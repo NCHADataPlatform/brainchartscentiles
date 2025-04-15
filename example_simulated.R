@@ -51,15 +51,27 @@ allIDs <- c(simdata0$ID, simdata4$ID)
 sharedIDs <- allIDs[duplicated(allIDs)]
 
 # pick random selection of subjects from time point 4
-nsmall <- 10
+nsmall <- 50
 P <- randperm(1:length(sharedIDs), nsmall)
 
 sample4 <- simdata4[simdata4$ID %in% sharedIDs[P],]
 
 base4 <- calibrateBrainChartsIDQuantilePenalty(sample4, phenotype = "CT", largeSiteOutput = base0)
-
 # mu and sigma will be in
 # base4$expanded$mu$ranef["V1"], base4$expanded$sigma$ranef["V1"]
 
 # for cortical thickness, the estimated quantiles for the altered distributions after site-effect corrections are
 # base4$DATA.PRED2$meanCT2Transformed.q.wre
+
+T <- bind_rows(base0$DATA.PRED2, base4$DATA.PRED2)
+
+mapping <- c(V1 = "large", V5 = "small")
+T$study <- mapping[T$study]
+ggplot(T, aes(x = age_days)) + geom_point(aes(y = meanCT2Transformed, colour = study)) + 
+  geom_line(aes(y = PRED.l025.wre)) + 
+  geom_line(aes(y = PRED.l250.wre)) + 
+  geom_line(aes(y = PRED.m500.wre)) +
+  geom_line(aes(y = PRED.u750.wre)) +
+  geom_line(aes(y = PRED.u975.wre)) +
+  labs(x = "Age (days)", y = "CT (transformed)")
+ggsave('example_simulated.png')
