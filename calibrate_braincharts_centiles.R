@@ -27,12 +27,12 @@ source("301.functions.r")
 setwd(wd)
 
 
-calibrateBrainCharts <- function(noveldata, phenotype=c("GMV", "CT", "TCV", "SA", "sGMV", "WMV", "Ventricles"), phenofit = NULL, expandedFunc = Calc.Expanded) {
+calibrateBrainCharts <- function(noveldata, phenotype=c("GMV", "CT", "TCV", "SA", "sGMV", "WMV", "Ventricles"), phenofit = NULL, expandedFunc = Calc.Expanded, largeSiteOutput=NULL) {
   phenotype <- match.arg(phenotype)
   # the fit will be loaded from file. The argument option
   # is for the bootstrap case
   if (is.null(phenofit)) {
-    phenofit <- readRDS(paste0("./LifespanDist/Share/FIT_", phenotype, ".rds"))
+    phenofit <- readRDS(file.path(fileLocation, "Lifespan", 'Share', 'OriginalModels', paste0("FIT_", phenotype, ".rds")))
   }
   # Mess with tidyverse style variables etc
   #message(phenotype)
@@ -91,7 +91,7 @@ calibrateBrainCharts <- function(noveldata, phenotype=c("GMV", "CT", "TCV", "SA"
   
   ## this is a sample dataset for matching up types etc
   # Needs to be matched to the specific phenotype
-  example_calibrate <- read_csv(file.path("Samples/", paste0(phenotype, ".csv")), show_col_types = FALSE)
+  example_calibrate <- read_csv(file.path(fileLocation, "Samples", paste0(phenotype, ".csv")), show_col_types = FALSE)
   example_calibrate <- mutate(example_calibrate, 
                               fs_version="FS53",
                               fs_version = factor(fs_version, 
@@ -122,16 +122,20 @@ calibrateBrainCharts <- function(noveldata, phenotype=c("GMV", "CT", "TCV", "SA"
   
   novel$SUBSET <- novel$DATA.PRED[attr(novel$DATA.PRED,"logical.selectors")$REFIT.VALID,]
   
-  # print("novel$SUBSET")
-  # print(novel$SUBSET)
-  # print("Cur.Param")
-  # print(phenofit$param)
-  # Calc.Expanded uses optim and Ranef.MLE.Func
-  
-  EXPANDED <- do.call(expandedFunc, list(NewData=novel$SUBSET,
-                            Cur.Param=phenofit$param,
-                            Missing=attr(novel$DATA.PRED,"missing.levels"))
-                      )
+  # for the quantile method
+  if(!is.null(largeSiteOutput)) {
+    EXPANDED <- do.call(expandedFunc, list(NewData=novel$SUBSET,
+                                           Cur.Param=phenofit$param,
+                                           Missing=attr(novel$DATA.PRED,"missing.levels"),
+                                           largeSiteOutput=largeSiteOutput),
+    )
+  } else {
+    EXPANDED <- do.call(expandedFunc, list(NewData=novel$SUBSET,
+                                           Cur.Param=phenofit$param,
+                                           Missing=attr(novel$DATA.PRED,"missing.levels"))
+    )
+    
+  }
   
   
   novel$DATA.PRED2 <- Apply.Param(NEWData=novel$DATA,
@@ -148,13 +152,13 @@ calibrateBrainCharts <- function(noveldata, phenotype=c("GMV", "CT", "TCV", "SA"
   return(novel)
 }
 
-calibrateBrainChartsIDQuantilePenalty <- function(noveldata, phenotype=c("GMV", "CT", "TCV", "SA", "sGMV", "WMV", "Ventricles"), phenofit=NULL) {
-  return(calibrateBrainCharts(noveldata, phenotype = phenotype, phenofit = phenofit, expandedFunc = Calc.Expanded.ID.QuantilePenalty))
+calibrateBrainChartsIDQuantilePenalty <- function(noveldata, phenotype=c("GMV", "CT", "TCV", "SA", "sGMV", "WMV", "Ventricles"), phenofit=NULL, largeSiteOutput=NULL) {
+  return(calibrateBrainCharts(noveldata, phenotype = phenotype, phenofit = phenofit, expandedFunc = Calc.Expanded.ID.QuantilePenalty, largeSiteOutput = largeSiteOutput))
 }
 
-Calc.Expanded.ID.QuantilePenalty <- function( NewData, Cur.Param, Missing, Prefix="" ) {
+Calc.Expanded.ID.QuantilePenalty <- function( NewData, Cur.Param, Missing, Prefix="", largeSiteOutput=NULL ) {
   OPT <- optim(par=Missing$Vector, fn=Ranef.MLE.Func.ID.QuantilePenalty,
-               Param=Cur.Param, Missing=Missing$Levels, Novel=NewData, Prefix=Prefix,
+               Param=Cur.Param, Missing=Missing$Levels, Novel=NewData, Prefix=Prefix, largeSiteOutput=largeSiteOutput,
                method=if(length(Missing$Vector)==1){"Brent"}else{"Nelder-Mead"},
                lower=if(length(Missing$Vector)==1){-1000}else{-Inf},
                upper=if(length(Missing$Vector)==1){ 1000}else{ Inf},
@@ -176,7 +180,7 @@ Calc.Expanded.ID.QuantilePenalty <- function( NewData, Cur.Param, Missing, Prefi
 ##
 ## MLE refitting functions supporting ID as random effect
 ##
-Ranef.MLE.Func.ID.QuantilePenalty <- function( theta, Param, Missing, Novel, Prefix="", Return="optim" ) {
+Ranef.MLE.Func.ID.QuantilePenalty <- function( theta, Param, Missing, Novel, Prefix="", Return="optim", largeSiteOutput=NULL ) {
   
   if( missing(theta)|missing(Param)|missing(Missing)|missing(Novel) ) {stop("Mandatory argmument(s) missing")}
   #print("theta")
@@ -195,9 +199,7 @@ Ranef.MLE.Func.ID.QuantilePenalty <- function( theta, Param, Missing, Novel, Pre
   if(length(theta)!=sum(sapply(Missing,lengths))){stop("Problem: length(theta) != number of Missing levels")}
   
   LL.ranef <- list()
-  #print("length(Missing)")
-  #print(length(Missing))
-  #print(Missing)
+  
   DIST <- get( Param$family )()
   
   for( lIDX in 1:length(Missing) ) {
@@ -215,7 +217,7 @@ Ranef.MLE.Func.ID.QuantilePenalty <- function( theta, Param, Missing, Novel, Pre
     Novel[,sprintf("%s%s.wre",Prefix,LAB)]  <-  Novel[,sprintf("%s%s.pop",Prefix,LAB),drop=TRUE] + theta[JDX[lMATCH]]
     
   }
-  #print(theta)
+  
   lARGS <- list()
   CHECK <- DIST$parameters
   for( LAB in names(DIST$parameters) ) {
@@ -223,40 +225,29 @@ Ranef.MLE.Func.ID.QuantilePenalty <- function( theta, Param, Missing, Novel, Pre
     CHECK[[LAB]] <- DIST[[sprintf("%s.valid",LAB)]]( lARGS[[LAB]] )
   }
   if( !all(unlist(CHECK)) ) {stop("Failed distribution parameter checks")}
-  #print(c(lARGS,list(x=Novel[,attr(Param,"model")$covariates$Y])))
+  
   # LL.out
   LL.out <- do.call( what=get(paste0("d",Param$family)), args=c(lARGS,list(x=Novel[,attr(Param,"model")$covariates$Y],log=TRUE)))
-  #print(LL.out)
+  
   # get the quantiles of the data in the adjusted distributions
   Novel[,"Quantiles"] <- do.call( what=get(paste0("p",Param$family)), args=c(lARGS,list(q=Novel[,attr(Param,"model")$covariates$Y],log=FALSE)))
-  #print(c(lARGS,list(q=Novel[,attr(Param,"model")$covariates$Y])))
-  UniqueParticipants <- unique(Novel$participant)
+
+  # need to 
+  largeSiteQuantiles <- data.frame(ID = largeSiteOutput$DATA.PRED2$ID, Quantiles = largeSiteOutput$DATA.PRED2[paste0(attr(Param,"model")$covariates$Y, '.q.wre')])
+  
+  T <- bind_rows(Novel[,c('ID', "Quantiles")], largeSiteQuantiles)
+  
+  UniqueParticipants <- T$participant[duplicated(T$participant)]
   LL.QuantilePenalty <- list()
   for (CurParticipant in UniqueParticipants) {
-    Y <- Novel[Novel$participant == CurParticipant, "Quantiles"]
-    if(length(Y) > 1) {
-      #LL.QuantilePenalty[CurParticipant] <- sum(abs(Y - Y[1]))
-      LL.QuantilePenalty[CurParticipant] <- dnorm(x=sum(abs(Y - Y[1])),mean=0,sd=0.4 * (length(Y) - 1),log=TRUE) ## this can be a vector of length>1  
-      # browser()
-      #print(Y)
-      # print("Abs")
-      # print(LL.QuantilePenaltyAbs[CurParticipant])
-      # print("DNorm")
-      # print(LL.QuantilePenalty[CurParticipant])
-    }
+    Y <- T[T$participant == CurParticipant, "Quantiles"]
+    LL.QuantilePenalty[CurParticipant] <- dnorm(x=sum(abs(Y - Y[1])),mean=0,sd=0.4 * (length(Y) - 1),log=TRUE)
   }
-  StudyTable <- table(Novel$study)
   
   S.LL.QuantilePenalty <- sum(unlist(LL.QuantilePenalty))
-  S.LL.QuantilePenalty <- S.LL.QuantilePenalty * max(StudyTable) / min(StudyTable) / 4
+  S.LL.QuantilePenalty <- S.LL.QuantilePenalty * nrow(largeSiteQuantiles) / nrow(Novel) / 4
   
-  # NEWData[out.WHICH[[lTYPE]],sprintf("%s%s.q.%s",Prefix,OUT.NAME,lTYPE)] <- do.call(what=get(paste0("p",FAMILY$family[1])),
-  #                                                                                   args=c(out.SHORT[[lTYPE]],
-  #                                                                                          list(q=NEWData[out.WHICH[[lTYPE]],OUT.NAME,drop=TRUE])))
-  
-  #print(c(sum(LL.out), sum(unlist(LL.ranef)), S.LL.QuantilePenalty))
   if( Return=="optim" ) {
-    #print(-1 * ( sum(LL.out) + sum(unlist(LL.ranef)) ))
     -1 * ( sum(LL.out) + sum(unlist(LL.ranef)) + S.LL.QuantilePenalty)
   } else if ( Return=="LL" ) {
     sum(LL.out)
