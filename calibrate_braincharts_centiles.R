@@ -124,6 +124,7 @@ calibrateBrainCharts <- function(noveldata, phenotype=c("GMV", "CT", "TCV", "SA"
   
   # for the quantile method
   if(!is.null(largeSiteOutput)) {
+    
     EXPANDED <- do.call(expandedFunc, list(NewData=novel$SUBSET,
                                            Cur.Param=phenofit$param,
                                            Missing=attr(novel$DATA.PRED,"missing.levels"),
@@ -171,7 +172,7 @@ Calc.Expanded.ID.QuantilePenalty <- function( NewData, Cur.Param, Missing, Prefi
     ## Append new levels to fit object
     ##
     EXPANDED <- Add.New.Ranefs( new.vector=OPT$par, Fit.Extract=Cur.Param, Missing=Missing$Levels )
-    EXPANDED$LL <- Ranef.MLE.Func.ID.QuantilePenalty(OPT$par, Param=Cur.Param, Missing=Missing$Levels, Novel=NewData, Prefix=Prefix, Return="LL")
+    #EXPANDED$LL <- Ranef.MLE.Func.ID.QuantilePenalty(OPT$par, Param=Cur.Param, Missing=Missing$Levels, Novel=NewData, Prefix=Prefix, Return="LL")
     return(EXPANDED)
   }
 }
@@ -225,7 +226,7 @@ Ranef.MLE.Func.ID.QuantilePenalty <- function( theta, Param, Missing, Novel, Pre
     CHECK[[LAB]] <- DIST[[sprintf("%s.valid",LAB)]]( lARGS[[LAB]] )
   }
   if( !all(unlist(CHECK)) ) {stop("Failed distribution parameter checks")}
-  
+  #print(paste("Novel rows: ", nrow(Novel)))
   # LL.out
   LL.out <- do.call( what=get(paste0("d",Param$family)), args=c(lARGS,list(x=Novel[,attr(Param,"model")$covariates$Y],log=TRUE)))
   
@@ -233,19 +234,43 @@ Ranef.MLE.Func.ID.QuantilePenalty <- function( theta, Param, Missing, Novel, Pre
   Novel[,"Quantiles"] <- do.call( what=get(paste0("p",Param$family)), args=c(lARGS,list(q=Novel[,attr(Param,"model")$covariates$Y],log=FALSE)))
 
   # need to 
-  largeSiteQuantiles <- data.frame(ID = largeSiteOutput$DATA.PRED2$ID, Quantiles = largeSiteOutput$DATA.PRED2[paste0(attr(Param,"model")$covariates$Y, '.q.wre')])
+  largeSiteQuantiles <- data.frame(ID = largeSiteOutput$DATA.PRED2$ID, Quantiles = largeSiteOutput$DATA.PRED2[[paste0(attr(Param,"model")$covariates$Y, '.q.wre')]])
   
   T <- bind_rows(Novel[,c('ID', "Quantiles")], largeSiteQuantiles)
-  
-  UniqueParticipants <- T$participant[duplicated(T$participant)]
+  #print(T)
+
+  UniqueParticipants <- T$ID[duplicated(T$ID)]
+  #print(UniqueParticipants)
   LL.QuantilePenalty <- list()
   for (CurParticipant in UniqueParticipants) {
-    Y <- T[T$participant == CurParticipant, "Quantiles"]
+    Y <- T[T$ID == CurParticipant, "Quantiles"]
     LL.QuantilePenalty[CurParticipant] <- dnorm(x=sum(abs(Y - Y[1])),mean=0,sd=0.4 * (length(Y) - 1),log=TRUE)
   }
   
   S.LL.QuantilePenalty <- sum(unlist(LL.QuantilePenalty))
-  S.LL.QuantilePenalty <- S.LL.QuantilePenalty * nrow(largeSiteQuantiles) / nrow(Novel) / 4
+  CentileFactorSlope <- -0.0478
+  CentileFactorIntercept <- 12.2065
+  #CentileFactor <- min(max(length(UniqueParticipants) * CentileFactorSlope + CentileFactorIntercept, 0.25), 11.25)
+  
+  CentileFactorA <- 15.66
+  CentileFactorB <- -0.0166
+  #CentileFactor <- min(max(CentileFactorA * exp(-length(UniqueParticipants) * CentileFactorB), 0.25), 11.25)
+
+    
+
+  sigmoidWeights = c(73.76, -0.03, -17.94);
+  sigmoidWeights = c(51, -0.043, -4.27);
+  CentileFactor <- sigmoidWeights[[1]] / ( 1 + exp(-sigmoidWeights[2] * (length(UniqueParticipants) - sigmoidWeights[3])))
+  CentileFactor <- min(max(CentileFactor, 2), 15)
+  S.LL.QuantilePenalty <- S.LL.QuantilePenalty * CentileFactor
+
+  #if(nrow(largeSiteQuantiles) == 0) {
+  #  print(largeSiteOutput) 
+  #}
+  #print(paste0(nrow(largeSiteQuantiles), " ", nrow(Novel), " " , nrow(largeSiteQuantiles) / nrow(Novel) / 4))
+  #print(CentileFactor)
+  
+  #S.LL.QuantilePenalty <- S.LL.QuantilePenalty * nrow(largeSiteQuantiles) / nrow(Novel) / 4
   
   if( Return=="optim" ) {
     -1 * ( sum(LL.out) + sum(unlist(LL.ranef)) + S.LL.QuantilePenalty)
