@@ -40,6 +40,7 @@ simdata4 <- mutate(simdata4, study = paste0("V", INDEX.OB))
 
 # fit for the main site
 base0 <- calibrateBrainCharts(simdata0, phenotype = "CT")
+base4 <- calibrateBrainCharts(simdata4, phenotype = "CT")
 
 # mu and sigma will be in
 # $base0$expanded$mu$ranef["V1"], base0$expanded$sigma$ranef["V1"]
@@ -56,22 +57,23 @@ P <- randperm(1:length(sharedIDs), nsmall)
 
 sample4 <- simdata4[simdata4$ID %in% sharedIDs[P],]
 
-base4 <- calibrateBrainChartsIDQuantilePenalty(sample4, phenotype = "CT", largeSiteOutput = base0)
+sample4Output <- calibrateBrainChartsIDQuantilePenalty(sample4, phenotype = "CT", largeSiteOutput = base0)
 # mu and sigma will be in
 # base4$expanded$mu$ranef["V1"], base4$expanded$sigma$ranef["V1"]
 
 # for cortical thickness, the estimated quantiles for the altered distributions after site-effect corrections are
 # base4$DATA.PRED2$meanCT2Transformed.q.wre
 
-T <- bind_rows(base0$DATA.PRED2, base4$DATA.PRED2)
+T <- bind_rows(base0$DATA.PRED2, sample4Output$DATA.PRED2)
 
 mapping <- c(V1 = "large", V5 = "small")
 T$study <- mapping[T$study]
 ggplot(T, aes(x = age_days)) + geom_point(aes(y = meanCT2Transformed, colour = study)) + 
-  geom_line(aes(y = PRED.l025.wre)) + 
   geom_line(aes(y = PRED.l250.wre)) + 
-  geom_line(aes(y = PRED.m500.wre)) +
+  geom_line(aes(y = PRED.m500.wre), linewidth = 2) +
   geom_line(aes(y = PRED.u750.wre)) +
-  geom_line(aes(y = PRED.u975.wre)) +
+  geom_line(data = base4$DATA.PRED2, aes(x = age_days, y = PRED.l250.wre), colour = 'green') +
+  geom_line(data = base4$DATA.PRED2, aes(x = age_days, y = PRED.m500.wre), colour = 'green', linewidth = 2) +
+  geom_line(data = base4$DATA.PRED2, aes(x = age_days, y = PRED.u750.wre), colour = 'green') +
   labs(x = "Age (days)", y = "CT (transformed)")
 ggsave('example_simulated.png')
