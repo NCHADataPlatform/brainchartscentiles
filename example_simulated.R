@@ -3,11 +3,8 @@ source("study_simulations.R")
 library('pracma')
 library('parallel')
 library('furrr')
-
-library('lme4')
 library("future")
 library("optparse")
-
 
 ## generates data for 22 "studies" across age range
 DD <- genSimData()
@@ -58,22 +55,32 @@ P <- randperm(1:length(sharedIDs), nsmall)
 sample4 <- simdata4[simdata4$ID %in% sharedIDs[P],]
 
 sample4Output <- calibrateBrainChartsIDQuantilePenalty(sample4, phenotype = "CT", largeSiteOutput = base0)
+sample4CrossOutput <- calibrateBrainCharts(sample4, phenotype = "CT")
 # mu and sigma will be in
 # base4$expanded$mu$ranef["V1"], base4$expanded$sigma$ranef["V1"]
 
 # for cortical thickness, the estimated quantiles for the altered distributions after site-effect corrections are
 # base4$DATA.PRED2$meanCT2Transformed.q.wre
+base0$DATA.PRED2$fitting <- 'large sample (cross-sectional method)'
+sample4Output$DATA.PRED2$fitting <- 'small site (quantile method)'
+sample4CrossOutput$DATA.PRED2$fitting <- 'small site (cross-sectional method)'
+base4$DATA.PRED2$fitting <- 'small site (ground truth)'
 
 T <- bind_rows(base0$DATA.PRED2, sample4Output$DATA.PRED2)
+T <- bind_rows(T, sample4CrossOutput$DATA.PRED2)
+T <- bind_rows(T, base4$DATA.PRED2)
 
 mapping <- c(V1 = "large", V5 = "small")
-T$study <- mapping[T$study]
-ggplot(T, aes(x = age_days)) + geom_point(aes(y = meanCT2Transformed, colour = study)) + 
-  geom_line(aes(y = PRED.l250.wre)) + 
-  geom_line(aes(y = PRED.m500.wre), linewidth = 2) +
-  geom_line(aes(y = PRED.u750.wre)) +
-  geom_line(data = base4$DATA.PRED2, aes(x = age_days, y = PRED.l250.wre), colour = 'green') +
-  geom_line(data = base4$DATA.PRED2, aes(x = age_days, y = PRED.m500.wre), colour = 'green', linewidth = 2) +
-  geom_line(data = base4$DATA.PRED2, aes(x = age_days, y = PRED.u750.wre), colour = 'green') +
-  labs(x = "Age (days)", y = "CT (transformed)")
+T$sample <- mapping[T$study]
+
+T$meanCT2Transformed[T$fitting == "small site (ground truth)"] <- NA
+
+ggplot(T, aes(x = Time)) +
+  geom_point(aes(y = meanCT2Transformed * 10000, shape = sample), alpha = 0.5) +
+  geom_line(aes(y = PRED.l250.wre * 10000, colour = fitting)) + 
+  geom_line(aes(y = PRED.m500.wre * 10000, colour = fitting), linewidth = 1) +
+  geom_line(aes(y = PRED.u750.wre * 10000, colour = fitting)) +
+  labs(x = "Age (years)", y = "CT", colour = "Estimation Method", shape = "Sample")
+
+
 ggsave('example_simulated.png')

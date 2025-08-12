@@ -222,9 +222,14 @@ Ranef.MLE.Func.ID.QuantilePenalty <- function( theta, Param, Missing, Novel, Pre
   lARGS <- list()
   CHECK <- DIST$parameters
   for( LAB in names(DIST$parameters) ) {
+    print(sprintf("%s.wre",LAB))
+    print(Novel[,sprintf("%s.wre",LAB)])
+    
     lARGS[[LAB]] <- DIST[[sprintf("%s.linkinv",LAB)]]( Novel[,sprintf("%s.wre",LAB)] )
+    print(lARGS[[LAB]])
     CHECK[[LAB]] <- DIST[[sprintf("%s.valid",LAB)]]( lARGS[[LAB]] )
   }
+  print(lARGS)
   if( !all(unlist(CHECK)) ) {stop("Failed distribution parameter checks")}
   #print(paste("Novel rows: ", nrow(Novel)))
   # LL.out
