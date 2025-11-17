@@ -222,14 +222,11 @@ Ranef.MLE.Func.ID.QuantilePenalty <- function( theta, Param, Missing, Novel, Pre
   lARGS <- list()
   CHECK <- DIST$parameters
   for( LAB in names(DIST$parameters) ) {
-    print(sprintf("%s.wre",LAB))
-    print(Novel[,sprintf("%s.wre",LAB)])
     
     lARGS[[LAB]] <- DIST[[sprintf("%s.linkinv",LAB)]]( Novel[,sprintf("%s.wre",LAB)] )
     print(lARGS[[LAB]])
     CHECK[[LAB]] <- DIST[[sprintf("%s.valid",LAB)]]( lARGS[[LAB]] )
   }
-  print(lARGS)
   if( !all(unlist(CHECK)) ) {stop("Failed distribution parameter checks")}
   #print(paste("Novel rows: ", nrow(Novel)))
   # LL.out
@@ -239,16 +236,16 @@ Ranef.MLE.Func.ID.QuantilePenalty <- function( theta, Param, Missing, Novel, Pre
   Novel[,"Quantiles"] <- do.call( what=get(paste0("p",Param$family)), args=c(lARGS,list(q=Novel[,attr(Param,"model")$covariates$Y],log=FALSE)))
 
   # need to 
-  largeSiteQuantiles <- data.frame(ID = largeSiteOutput$DATA.PRED2$ID, Quantiles = largeSiteOutput$DATA.PRED2[[paste0(attr(Param,"model")$covariates$Y, '.q.wre')]])
+  largeSiteQuantiles <- data.frame(participant = largeSiteOutput$DATA.PRED2$participant, Quantiles = largeSiteOutput$DATA.PRED2[[paste0(attr(Param,"model")$covariates$Y, '.q.wre')]])
   
-  T <- bind_rows(Novel[,c('ID', "Quantiles")], largeSiteQuantiles)
+  T <- bind_rows(Novel[,c('participant', "Quantiles")], largeSiteQuantiles)
   #print(T)
 
-  UniqueParticipants <- T$ID[duplicated(T$ID)]
+  UniqueParticipants <- T$participant[duplicated(T$participant)]
   #print(UniqueParticipants)
   LL.QuantilePenalty <- list()
   for (CurParticipant in UniqueParticipants) {
-    Y <- T[T$ID == CurParticipant, "Quantiles"]
+    Y <- T[T$participant == CurParticipant, "Quantiles"]
     LL.QuantilePenalty[CurParticipant] <- dnorm(x=sum(abs(Y - Y[1])),mean=0,sd=0.4 * (length(Y) - 1),log=TRUE)
   }
   
