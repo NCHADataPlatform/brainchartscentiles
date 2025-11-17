@@ -64,7 +64,7 @@ Create a dataframe with the following columns:
 
 # Worked example
 
-The file freesurfer_example_hbn.R on the GitHub repo will now be described. This file can be used as a template for extracting user data from Freesurfer outputs.
+The file `freesurfer_example_hbn.R` on the GitHub repo will now be described. This file can be used as a template for extracting user data from Freesurfer outputs.
 
 Load the stats tables from your Freesurfer SUBJECTS_DIR, replace 'HBN', with yours:
 
