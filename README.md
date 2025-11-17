@@ -54,13 +54,13 @@ Create a dataframe with the following columns:
   - *participant*: participant ID, must be preserved for the repeated measures
   - *fs_version*: Freesurfer version used, supported values are {"FS6_T1", "FS6_T1T2", "Custom", "FS53", "Custom_T1T2", "FSInfant"}, ensure you choose a consistent version in your scripts, the particular choice doesn't matter too much, just ensure you always choose the same, Custom_T1T2 is used in the example scripts
 -	IDP variables (one is chosen for analysis), only the analysis IDP is required:
-  -	*CT*: mean cortical thickness, both hemispheres, mm
-  -	*GMV*: total grey matter volume, mm3
-  -	*TCV*: total cranial volume, mm3
-  -	*SA*: total cortical surface area, both hemispheres, mm2
-  - *sGMV*: subcortical grey matter volume, mm3 
-  - *WMV*: cerebral white matter volume mm3
-  - *Ventricles*: volume of lateral ventricles, mm3
+    -	*CT*: mean cortical thickness, both hemispheres, mm
+    -	*GMV*: total grey matter volume, mm3
+    -	*TCV*: total cranial volume, mm3
+    -	*SA*: total cortical surface area, both hemispheres, mm2
+    - *sGMV*: subcortical grey matter volume, mm3 
+    - *WMV*: cerebral white matter volume mm3
+    - *Ventricles*: volume of lateral ventricles, mm3
 
 # Worked example
 
