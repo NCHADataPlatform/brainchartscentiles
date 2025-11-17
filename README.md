@@ -47,20 +47,20 @@ This imports all required scripts from the Braincharts software.
 Create a dataframe with the following columns:
 
 - Predictor variables
-  -	age_days: age of subject in days
-  -	dx: {“CN” control, “notCN” patient}, only CN subjects are used for calibration
-  -	sex: factor column {“M”, “F”}
-  - study: string representing the sample, must be different than the studies in the training set, which are: 3R-BRAIN, ABCD, abide1, abide2, ADHD200, ADNI, AIBL, AOBA, AOMIC_ID1000, AOMIC_PIOP1, AOMIC_PIOP2, ARWIBO, BabyConnectome, BGSP, BHRCS, BSNIP, Calgary, CALM, CamCAN, CAMFT, Cornell_C1, Cornell_C2, cVEDA, devCCNP, dHCP, DLBS, EDSD, EMBARC, FemaleASD, FinnBrain, GUSTO, HABS, Harvard_Fetal1, HBN, HCP, HCP_lifespanA, HCP_lifespanD, IBIS, ICBM, IMAGEN, IMAP, IXI, LA5c, MCIC, Narratives, NHGRI, NIH, NIHPD, NSPN, NTB_Yale, OASIS3, Oulu, PCDC, PING, PNC, POND, PREVENTAD, RDB, SALD, SLIM, UCSD, UKB, VETSA, WAYNE
-  - participant: participant ID, must be preserved for the repeated measures
-  - fs_version: Freesurfer version used, supported values are {"FS6_T1", "FS6_T1T2", "Custom", "FS53", "Custom_T1T2", "FSInfant"}, ensure you choose a consistent version in your scripts, the particular choice doesn't matter too much, just ensure you always choose the same, Custom_T1T2 is used in the example scripts
+  -	*age_days*: age of subject in days
+  -	*dx*: {“CN” control, “notCN” patient}, only CN subjects are used for calibration
+  -	*sex*: factor column {“M”, “F”}
+  - *study*: string representing the sample, must be different than the studies in the training set, which are*: 3R-BRAIN, ABCD, abide1, abide2, ADHD200, ADNI, AIBL, AOBA, AOMIC_ID1000, AOMIC_PIOP1, AOMIC_PIOP2, ARWIBO, BabyConnectome, BGSP, BHRCS, BSNIP, Calgary, CALM, CamCAN, CAMFT, Cornell_C1, Cornell_C2, cVEDA, devCCNP, dHCP, DLBS, EDSD, EMBARC, FemaleASD, FinnBrain, GUSTO, HABS, Harvard_Fetal1, HBN, HCP, HCP_lifespanA, HCP_lifespanD, IBIS, ICBM, IMAGEN, IMAP, IXI, LA5c, MCIC, Narratives, NHGRI, NIH, NIHPD, NSPN, NTB_Yale, OASIS3, Oulu, PCDC, PING, PNC, POND, PREVENTAD, RDB, SALD, SLIM, UCSD, UKB, VETSA, WAYNE
+  - *participant*: participant ID, must be preserved for the repeated measures
+  - *fs_version*: Freesurfer version used, supported values are {"FS6_T1", "FS6_T1T2", "Custom", "FS53", "Custom_T1T2", "FSInfant"}, ensure you choose a consistent version in your scripts, the particular choice doesn't matter too much, just ensure you always choose the same, Custom_T1T2 is used in the example scripts
 -	IDP variables (one is chosen for analysis)
-  -	CT: mean cortical thickness, both hemispheres, mm
-  -	GMV: total grey matter volume, mm3
-  -	TCV: total cranial volume, mm3
-  -	SA: total cortical surface area, both hemispheres, mm2
-  - sGMV: subcortical grey matter volume, mm3 
-  - WMV: cerebral white matter volume mm3
-  - Ventricles: volume of lateral ventricles, mm3
+  -	*CT*: mean cortical thickness, both hemispheres, mm
+  -	*GMV*: total grey matter volume, mm3
+  -	*TCV*: total cranial volume, mm3
+  -	*SA*: total cortical surface area, both hemispheres, mm2
+  - *sGMV*: subcortical grey matter volume, mm3 
+  - *WMV*: cerebral white matter volume mm3
+  - *Ventricles*: volume of lateral ventricles, mm3
 
 # Worked example
 
