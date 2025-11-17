@@ -132,7 +132,7 @@ Put in study, must be different than the studies in the training set, which are
  NHGRI, NIH, NIHPD, NSPN, NTB_Yale, OASIS3, Oulu, PCDC, PING, PNC, POND, PREVENTAD,
  RDB, SALD, SLIM, UCSD, UKB, VETSA, WAYNE
 
-````
+```
 brainChartsDF$study <- 'MyStudy'
 ```
 
@@ -158,7 +158,7 @@ fullSampleRU <- calibrateBrainCharts(filter(brainChartsDF, study == "HBNRU"), ph
 In this example, we generate fake data for each site, adding a year to each subject's age, simulating a second timepoint, and altering the distribution parameters. This would not be done for your sample but it is necessary here.
 For each site, make a longitudinal second session with altered site parameters, generate new cortical thickness measures. The code won't be shown here but the dataframe brainChartsDFFake is made 
 
-Calibrate the full fake samples
+Calibrate the full fake samples:
 
 ````
 fakeSampleCBIC <- calibrateBrainCharts(filter(brainChartsDFFake, study == "HBNCBIC2"), phenotype = phenotype)
@@ -185,7 +185,7 @@ subFakeCBICOut <- calibrateBrainCharts(subFakeCBIC, phenotype = "CT")
 subFakeCBICOutQuantile <- calibrateBrainChartsIDQuantilePenalty(subFakeCBIC, phenotype = "CT", largeSiteOutput = fullSampleCBIC)
 ```
 
-Make plots 
+Make plots to show the predicted 
 
 ```
 fullSampleCBIC$DATA.PRED2$fitting <- 'large sample (cross-sectional method)'
