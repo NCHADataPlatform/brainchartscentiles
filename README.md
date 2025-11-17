@@ -29,7 +29,7 @@ install.packages(c('gamlss', 'tidyverse'))
 Dependencies for the example scripts on the github repository:
 
 ```
-install.packages(c('ggplot2'))
+install.packages(c('ggplot2', 'pracma'))
 ```
 
 The previous two commands only need to be executed once. 
