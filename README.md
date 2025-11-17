@@ -50,7 +50,7 @@ Create a dataframe with the following columns:
     -	*age_days*: age of subject in days
     -	*dx*: {“CN” control, “notCN” patient}, only CN subjects are used for calibration
     -	*sex*: factor column {“M”, “F”}
-     - *study*: string representing the sample, must be different than the studies in the training set, which are*: 3R-BRAIN, ABCD, abide1, abide2, ADHD200, ADNI, AIBL, AOBA, AOMIC_ID1000, AOMIC_PIOP1, AOMIC_PIOP2, ARWIBO, BabyConnectome, BGSP, BHRCS, BSNIP, Calgary, CALM, CamCAN, CAMFT, Cornell_C1, Cornell_C2, cVEDA, devCCNP, dHCP, DLBS, EDSD, EMBARC, FemaleASD, FinnBrain, GUSTO, HABS, Harvard_Fetal1, HBN, HCP, HCP_lifespanA, HCP_lifespanD, IBIS, ICBM, IMAGEN, IMAP, IXI, LA5c, MCIC, Narratives, NHGRI, NIH, NIHPD, NSPN, NTB_Yale, OASIS3, Oulu, PCDC, PING, PNC, POND, PREVENTAD, RDB, SALD, SLIM, UCSD, UKB, VETSA, WAYNE
+    - *study*: string representing the sample, must be different than the studies in the training set, which are*: 3R-BRAIN, ABCD, abide1, abide2, ADHD200, ADNI, AIBL, AOBA, AOMIC_ID1000, AOMIC_PIOP1, AOMIC_PIOP2, ARWIBO, BabyConnectome, BGSP, BHRCS, BSNIP, Calgary, CALM, CamCAN, CAMFT, Cornell_C1, Cornell_C2, cVEDA, devCCNP, dHCP, DLBS, EDSD, EMBARC, FemaleASD, FinnBrain, GUSTO, HABS, Harvard_Fetal1, HBN, HCP, HCP_lifespanA, HCP_lifespanD, IBIS, ICBM, IMAGEN, IMAP, IXI, LA5c, MCIC, Narratives, NHGRI, NIH, NIHPD, NSPN, NTB_Yale, OASIS3, Oulu, PCDC, PING, PNC, POND, PREVENTAD, RDB, SALD, SLIM, UCSD, UKB, VETSA, WAYNE
     - *participant*: participant ID, must be preserved for the repeated measures
     - *fs_version*: Freesurfer version used, supported values are {"FS6_T1", "FS6_T1T2", "Custom", "FS53", "Custom_T1T2", "FSInfant"}, ensure you choose a consistent version in your scripts, the particular choice doesn't matter too much, just ensure you always choose the same, Custom_T1T2 is used in the example scripts
 -	IDP variables (one is chosen for analysis), only the analysis IDP is required:
@@ -140,7 +140,7 @@ We will change this variable per site later. I will use the study names HBNCBIC,
 
 Loading in the demographics will be specific to how that data is stored for your sample. The code for this will not be shown here. Refer to the source code if interested.
 
-choose cortical thickness as phenotype
+Set the phenotype to *cortical thickness*:
 
 ```
 phenotype <- "CT"
@@ -160,7 +160,7 @@ For each site, make a longitudinal second session with altered site parameters, 
 
 Calibrate the full fake samples:
 
-````
+```
 fakeSampleCBIC <- calibrateBrainCharts(filter(brainChartsDFFake, study == "HBNCBIC2"), phenotype = phenotype)
 fakeSampleCUNY <- calibrateBrainCharts(filter(brainChartsDFFake, study == "HBNCUNY2"), phenotype = phenotype)
 fakeSampleSI <- calibrateBrainCharts(filter(brainChartsDFFake, study == "HBNSI2"), phenotype = phenotype)
