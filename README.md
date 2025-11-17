@@ -6,7 +6,7 @@ Please cite the publication ...
 
 # Background
 
-Braincharts [1] provides formulae that map predictor variables (age, sex, FreeSurfer version) to curves for distribution parameters that characterise brain IDPs cortical thickness, grey matter volume, cranial volume, cortical surface area, subcortical grey matter volume, cerebral white matter volume, lateral ventricle volumes. The curves are based on data from over 100,000 healthy individuals across the lifespan obrained from many samples. The distribution provided by Braincharts is the Generalized Gamma Distribution, which is a three-parameter distribution with location (mu) and shape (sigma, nu) variables. Calibration of non-training samples involves estimating offset factors for parameters mu and sigma that shift the predicted distribtions to match that of the novel sample. The Braincharts' method is known to be unstable for small (n < 100) samples. For a small sample with repeated measures in a large (n > 100) sample, such a sample has correction factors that are considered stable, this software allows researchers to leverage repeated samples to improve stability of the small sample correction factors. 
+Braincharts [[1]](#1). provides formulae that map predictor variables (age, sex, FreeSurfer version) to curves for distribution parameters that characterise brain IDPs cortical thickness, grey matter volume, cranial volume, cortical surface area, subcortical grey matter volume, cerebral white matter volume, lateral ventricle volumes. The curves are based on data from over 100,000 healthy individuals across the lifespan obrained from many samples. The distribution provided by Braincharts is the Generalized Gamma Distribution, which is a three-parameter distribution with location ($$\mu$$) and shape ($$\sigma$$, $$\nu$$) variables. Calibration of non-training samples involves estimating offset factors for parameters $$\mu$$ and $$\sigma$$ ($$\nu$$ is fixed) that shift the predicted distribtions to match that of the novel sample. The Braincharts' method is known to be unstable for small (n < 100) samples. For a small sample with repeated measures in a large (n > 100) sample, such a sample has correction factors that are considered stable, this software allows researchers to leverage repeated samples to improve stability of the small sample correction factors. 
 
 # Installation
 
@@ -218,3 +218,8 @@ ggsave('freesurfer_example_hbn_CBIC.png')
 ```
 
 This plot shows the predicted distribution quantiles. These should match the data.
+
+# References
+
+<a id="1">[1]</a> 
+Bethlehem, R.A.I., Seidlitz, J., White, S.R. et al. Brain charts for the human lifespan. Nature 604, 525–533 (2022). https://doi.org/10.1038/s41586-022-04554-y
