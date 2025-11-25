@@ -196,33 +196,30 @@ n <- 50
 subFakeCBIC <- filter(brainChartsDFFake, study == "HBNCBIC2")
 P <- randperm(1:nrow(subFakeCBIC))
 subFakeCBIC <- subFakeCBIC[P[1:n],]
-
-# run the normal Braincharts calibration
-subFakeCBICOut <- calibrateBrainCharts(subFakeCBIC, phenotype = "CT")
-# run the Quantile-informated calibration, using the full sample output as the large site reference
-subFakeCBICOutQuantile <- calibrateBrainChartsIDQuantilePenalty(subFakeCBIC, phenotype = "CT", largeSiteOutput = fullSampleCBIC)
-
-# do the same for the other sites
 subFakeCUNY <- filter(brainChartsDFFake, study == "HBNCUNY2")
 P <- randperm(1:nrow(subFakeCUNY))
 subFakeCUNY <- subFakeCUNY[P[1:n],]
-
-subFakeCUNYOut <- calibrateBrainCharts(subFakeCUNY, phenotype = "CT")
-subFakeCUNYOutQuantile <- calibrateBrainChartsIDQuantilePenalty(subFakeCUNY, phenotype = "CT", largeSiteOutput = fullSampleCUNY)
-
 subFakeRU <- filter(brainChartsDFFake, study == "HBNRU2")
 P <- randperm(1:nrow(subFakeRU))
 subFakeRU <- subFakeRU[P[1:n],]
-
-subFakeRUOut <- calibrateBrainCharts(subFakeRU, phenotype = "CT")
-subFakeRUOutQuantile <- calibrateBrainChartsIDQuantilePenalty(subFakeRU, phenotype = "CT", largeSiteOutput = fullSampleRU)
-
 subFakeSI <- filter(brainChartsDFFake, study == "HBNSI2")
 P <- randperm(1:nrow(subFakeSI))
 subFakeSI <- subFakeSI[P[1:n],]
 
-subFakeSIOut <- calibrateBrainCharts(subFakeSI, phenotype = "CT")
+# run the centile-informed calibration
+
+subFakeCBICOutQuantile <- calibrateBrainChartsIDQuantilePenalty(subFakeCBIC, phenotype = "CT", largeSiteOutput = fullSampleCBIC)
+subFakeCUNYOutQuantile <- calibrateBrainChartsIDQuantilePenalty(subFakeCUNY, phenotype = "CT", largeSiteOutput = fullSampleCUNY)
 subFakeSIOutQuantile <- calibrateBrainChartsIDQuantilePenalty(subFakeSI, phenotype = "CT", largeSiteOutput = fullSampleSI)
+subFakeRUOutQuantile <- calibrateBrainChartsIDQuantilePenalty(subFakeRU, phenotype = "CT", largeSiteOutput = fullSampleRU)
+
+# accuracy evaluation
+
+# run the normal Braincharts calibration on the small sites 
+subFakeCBICOut <- calibrateBrainCharts(subFakeCBIC, phenotype = "CT")
+subFakeCUNYOut <- calibrateBrainCharts(subFakeCUNY, phenotype = "CT")
+subFakeRUOut <- calibrateBrainCharts(subFakeRU, phenotype = "CT")
+subFakeSIOut <- calibrateBrainCharts(subFakeSI, phenotype = "CT")
 
 # make plots 
 
