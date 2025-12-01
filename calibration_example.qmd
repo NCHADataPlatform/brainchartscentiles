@@ -1,0 +1,113 @@
+---
+title: "BrainChart calibration tutorial"
+format: html
+---
+
+```{r, echo=FALSE}
+knitr::read_chunk("calibration_example_hbn.R")
+```
+
+# Introduction
+
+```{r Packages, message = FALSE, warning=FALSE}
+
+```
+
+The code in this repository extends the original BrainChart codebase, and
+therefore can't be assembled into a standard R package without restructuring 
+that code.
+
+The functionality in this repository is accessed via the following code snippet.
+
+```{r Setup, message = FALSE, warning = FALSE}
+
+```
+
+__IMPORTANT NOTE__ A full path to `calibrate_braincharts_centiles.R` must be provided 
+if your code is outside this repository. e.g.
+
+```{r, eval=FALSE}
+BrainChartFolder <- dirname(normalizePath("~/Projects/brainchartscentiles/calibrate_braincharts_centiles.R"))
+```
+
+
+
+Using the calibration functions requires the following steps:
+
+1. Loading brain IDPs
+1. Attaching demographic and site data
+1. Renaming columns
+
+This tutorial illustrates calibration using a combination of data from the healthy
+brain network and synthetic data. The code can be used as a template to
+calibrate your own data.
+
+Note that some output from the code snippets has been supressed to make cleaner
+documentation. The code used to create this tutorial is available in the file
+`calibration_example_hbn.R`.
+
+# Loading FreeSurfer and demographic data
+
+## Helper function and loading FreeSurfer data
+
+First load the study FreeSurfer data. These tables are collated from the individual 
+study statistics using the FreeSurfer `asegstats2table` and `aparcstats2table`
+utilities, as illustrated in the bash script named `freesurfer_make_stats.sh`.
+
+```{r LoadingStructuralData, message=FALSE}
+
+```
+
+## Set up IDP columns
+
+Next, we select columns of interest and combine and rename them as required by the
+BrainChart calibration process. We then join the per-hemisphere surface-based
+metrics to the volume metrics and optionally discard columns not required by 
+calibration.
+
+```{r MakeIDPColumns}
+
+```
+
+## Prepare demographic information
+
+Preparing the demographic information is similar. In the HBN dataset the
+demographic tables are provided on a per-study basis, so we load them individually,
+create a study column, combine into a single table, create an `age_days` column
+and rename the `Sex` column and set up the factor levels.
+```{r LoadDemo}
+
+```
+
+## Combining IDP and demographic tables
+
+Finally, we merge the demographic and IDP tables using the study ID as a key, and
+exclude any incomplete records.
+
+More complex studies may require merging by combinations of multiple columns,
+such as ID and time point or site.
+
+```{r JoinDemographics}
+
+```
+
+# Calibration
+
+## Study overview
+
+Perform a quick check of study numbers and breakdown by sex to ensure that
+the data is correctly loaded
+
+```{r StudyOverview}
+
+```
+
+## Calibration, Phase 1
+Phase 1 of calibration is the standard, cross sectional, version proposed
+in the original BrainChart paper. We perform this on a per-study basis, as
+follows.
+
+```{r CalibrationPhase1, warning=FALSE}
+
+```
+
