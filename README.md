@@ -16,6 +16,7 @@ This software runs as as addon to the Braincharts software, which was written in
 git clone https://github.com/NCHADataPlatform/brainchartscentiles.git
 cd brainchartscentiles
 git submodule init .
+git submodule update
 ```
 
 ## R dependencies

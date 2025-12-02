@@ -1,25 +1,26 @@
 # consolidated version from prep_brainchart_test.R
 library(tidyverse)
-
 # Lifespan is a copy of the braincharts github repo
 
-getCurrentFileLocation <-  function()
-{
-  this_file <- commandArgs() %>% 
-    tibble::enframe(name = NULL) %>%
-    tidyr::separate(col=value, into=c("key", "value"), sep="=", fill='right') %>%
-    dplyr::filter(key == "--file") %>%
-    dplyr::pull(value)
-  if (length(this_file)==0)
-  {
-    this_file <- rstudioapi::getSourceEditorContext()$path
-  }
-  return(dirname(this_file))
-}
-
-fileLocation <- getCurrentFileLocation()
-
-wd <- setwd(file.path(fileLocation, "Lifespan"))
+# getCurrentFileLocation <-  function()
+# {
+#   this_file <- commandArgs() %>% 
+#     tibble::enframe(name = NULL) %>%
+#     tidyr::separate(col=value, into=c("key", "value"), sep="=", fill='right') %>%
+#     dplyr::filter(key == "--file") %>%
+#     dplyr::pull(value)
+#   if (length(this_file)==0)
+#   {
+#     this_file <- rstudioapi::getSourceEditorContext()$path
+#   }
+#   return(dirname(this_file))
+# }
+# message(commandArgs())
+# fileLocation <- getCurrentFileLocation()
+# message(fileLocation)
+fileLocation <- getwd()
+wd <- setwd(file.path("Lifespan"))
+#wd <- setwd(file.path(fileLocation, "Lifespan"))
 source("100.common-variables.r")
 source("101.common-functions.r")
 source("300.variables.r")

@@ -6,7 +6,7 @@ library('pracma')
 asegDF <- read.csv(file.path('HBN', 'stats_aseg.csv'))
 lhCortThicknessDF <- read.csv(file.path('HBN', 'stats_aparc_lh_thickness.csv'))
 lhCortSurfaceAreaDF <- read.csv(file.path('HBN', 'stats_aparc_lh_area.csv'))
-rhCortThicknessDF <- read.csv(file.path('HBN', 'stats_aparc_lh_thickness.csv'))
+rhCortThicknessDF <- read.csv(file.path('HBN', 'stats_aparc_lh_thickness.csv')) ## wrong
 rhCortSurfaceAreaDF <- read.csv(file.path('HBN', 'stats_aparc_rh_area.csv'))
 
 # set the row names to participant IDs
@@ -22,7 +22,7 @@ brainChartsDF <- data.frame(row.names=asegDF$Measure.volume)
 brainChartsDF$WMV <- asegDF$CerebralWhiteMatterVol
 brainChartsDF$sGMV <- asegDF$SubCortGrayVol
 brainChartsDF$GWMV <- asegDF$CortexVol
-brainChartsDF$etiv <- asegDF$eTIV
+brainChartsDF$etiv <- asegDF$eTIV # wrong
 brainChartsDF$Ventricles <- asegDF$VentricleChoroidVol
 brainChartsDF$TCV <- asegDF$SupraTentorialVolNotVent
 brainChartsDF$SA <- lhCortSurfaceAreaDF$lh_WhiteSurfArea_area + rhCortSurfaceAreaDF$rh_WhiteSurfArea_area
