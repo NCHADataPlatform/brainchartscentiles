@@ -109,15 +109,18 @@ brainChartsDF <- na.omit(brainChartsDF)
 
 brainChartsDF <- mutate(brainChartsDF, study = factor(study, levels=c("HBNCBIC", "HBNCUNY", "HBNRU", "HBNSI")))
 count(brainChartsDF, study)
-
 count(brainChartsDF, study, sex, sort = FALSE)
-
+row.names(brainChartsDF) <- brainChartsDF$ID
 # ---- CalibrationPhase1 ----
 phenotype <- "CT"
 
 # do the full sample calibrations per site
-fullSampleCBIC <- calibrateBrainCharts(filter(brainChartsDF, study == "HBNCBIC"), phenotype = phenotype)
-fullSampleCUNY <- calibrateBrainCharts(filter(brainChartsDF, study == "HBNCUNY"), phenotype = phenotype)
-fullSampleSI <- calibrateBrainCharts(filter(brainChartsDF, study == "HBNSI"), phenotype = phenotype)
-fullSampleRU <- calibrateBrainCharts(filter(brainChartsDF, study == "HBNRU"), phenotype = phenotype)
+fullSampleCBICCalibration <- calibrateBrainCharts(filter(brainChartsDF, study == "HBNCBIC"), phenotype = phenotype)
+fullSampleCUNYCalibration <- calibrateBrainCharts(filter(brainChartsDF, study == "HBNCUNY"), phenotype = phenotype)
+fullSampleSICalibration <- calibrateBrainCharts(filter(brainChartsDF, study == "HBNSI"), phenotype = phenotype)
+fullSampleRUCalibration <- calibrateBrainCharts(filter(brainChartsDF, study == "HBNRU"), phenotype = phenotype)
 
+row.names(fullSampleCBICCalibration$DATA.PRED2) <- fullSampleCBICCalibration$DATA.PRED2$ID
+row.names(fullSampleCUNYCalibration$DATA.PRED2) <- fullSampleCUNYCalibration$DATA.PRED2$ID
+row.names(fullSampleSICalibration$DATA.PRED2) <- fullSampleSICalibration$DATA.PRED2$ID
+row.names(fullSampleRUCalibration$DATA.PRED2) <- fullSampleRUCalibration$DATA.PRED2$ID
