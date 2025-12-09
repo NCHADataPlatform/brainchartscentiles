@@ -1,6 +1,7 @@
 # ---- Packages ----
 
 library(tidyverse)
+library(pracma)
 
 # ---- Setup ----
 
@@ -73,6 +74,20 @@ brainChartsDF <- mutate(brainChartsDF,
 brainChartsDF <- select(brainChartsDF, -Right.Lateral.Ventricle, 
                         -Left.Lateral.Ventricle, 
                         -ends_with("area"), -ends_with("thickness"))
+# ---- MakeOtherColumns ----
+
+
+brainChartsDF <- mutate(brainChartsDF, 
+                        fs_version = 'Custom_T1T2',
+                        run = 1,
+                        participant = ID,
+                        country = 'Australia',
+)
+
+# ---- MakeDXColumn ----
+brainChartsDF <- mutate(brainChartsDF, 
+                        dx = "CN"
+)
 
 # ---- LoadDemo ----
 
@@ -104,14 +119,16 @@ brainChartsDF <- left_join(brainChartsDF,
 
 # remove mising values
 brainChartsDF <- na.omit(brainChartsDF)
+brainChartsDF <- mutate(brainChartsDF, study = factor(study, levels=c("HBNCBIC", "HBNCUNY", "HBNRU", "HBNSI")))
 
 # ---- StudyOverview ----
 
-brainChartsDF <- mutate(brainChartsDF, study = factor(study, levels=c("HBNCBIC", "HBNCUNY", "HBNRU", "HBNSI")))
 count(brainChartsDF, study)
 count(brainChartsDF, study, sex, sort = FALSE)
 
+# ---- CalibrationPhase1 ----
 brainChartsDF <- filter(brainChartsDF, study == "HBNCBIC")
+# convert to dataframe for compatability with non-tidyverse code
 brainChartsDF <- data.frame(brainChartsDF)
 row.names(brainChartsDF) <- brainChartsDF$ID
 
@@ -119,67 +136,48 @@ phenotype <- "CT"
 
 # do the full sample calibrations per site
 fullSampleCBICCalibration <- calibrateBrainCharts(filter(brainChartsDF, study == "HBNCBIC"), phenotype = phenotype)
-# fullSampleCUNYCalibration <- calibrateBrainCharts(filter(brainChartsDF, study == "HBNCUNY"), phenotype = phenotype)
-# fullSampleSICalibration <- calibrateBrainCharts(filter(brainChartsDF, study == "HBNSI"), phenotype = phenotype)
-# fullSampleRUCalibration <- calibrateBrainCharts(filter(brainChartsDF, study == "HBNRU"), phenotype = phenotype)
 
-row.names(fullSampleCBICCalibration$DATA.PRED2) <- fullSampleCBICCalibration$DATA.PRED2$ID
-# row.names(fullSampleCUNYCalibration$DATA.PRED2) <- fullSampleCUNYCalibration$DATA.PRED2$ID
-# row.names(fullSampleSICalibration$DATA.PRED2) <- fullSampleSICalibration$DATA.PRED2$ID
-# row.names(fullSampleRUCalibration$DATA.PRED2) <- fullSampleRUCalibration$DATA.PRED2$ID
+# ---- SimulateSmallSiteSetup ----
+simulateSmallSite <- function(fullSampleCalibration, BC) {
+  row.names(fullSampleCalibration$DATA.PRED2) <- fullSampleCBICCalibration$DATA.PRED2$ID
+  
+  BC$mu.wre <- NA
+  BC$sigma.wre <- NA
+  BC$nu.wre <- NA
+  row.names(BC) <- BC$ID
+  
+  BC[row.names(fullSampleCalibration$DATA.PRED2), 'mu.wre'] <- fullSampleCalibration$DATA.PRED2[row.names(fullSampleCalibration$DATA.PRED2), 'mu.wre']
+  BC[row.names(fullSampleCalibration$DATA.PRED2), 'sigma.wre'] <- fullSampleCalibration$DATA.PRED2[row.names(fullSampleCalibration$DATA.PRED2), "sigma.wre"]
+  BC[row.names(fullSampleCalibration$DATA.PRED2), 'nu.wre'] <- fullSampleCalibration$DATA.PRED2[row.names(fullSampleCalibration$DATA.PRED2), "nu.wre"]
+  
+  # generate a new table with altered distribution parameters
+  BCFake <- BC
+  # add timepoint effects
+  muNudge <- 0.1
+  sigmaNudge <- 0.1
+  BCFake$mu.wre <- BC$mu.wre + muNudge
+  BCFake$sigma.wre <- BC$sigma.wre + sigmaNudge
+  
+  # add a year to the ages and some randomness
+  BCFake$age_days <- BCFake$age_days + 365.25 + abs(rnorm(nrow(BCFake), mean = 0, sd = 10))
+  # generate variables from altered distributions
+  BCFake$CT <- rGGalt(nrow(BCFake), exp(BCFake$mu.wre), exp(BCFake$sigma.wre), BCFake$nu.wre) * 10000
+  
+  BCFake$study <- paste0(BCFake$study, "2")
+  
+  n <- 50
+  subFakeCBIC <- filter(BCFake, study == "HBNCBIC2")
+  P <- randperm(1:nrow(subFakeCBIC))
+  subFakeCBIC <- subFakeCBIC[P[1:n],]
+  
+  # add some patients too.
+  return(subFakeCBIC)
+}
+# ---- SimulateSmallSite ----
 
-brainChartsDF$mu.wre <- NA
-brainChartsDF$sigma.wre <- NA
-brainChartsDF$nu.wre <- NA
-row.names(brainChartsDF) <- brainChartsDF$ID
+subFakeCBIC <- simulateSmallSite(fullSampleCBICCalibration, brainChartsDF)
+# ---- CalibrationPhase2 ----
 
-brainChartsDF[row.names(fullSampleCBICCalibration$DATA.PRED2), 'mu.wre'] <- fullSampleCBICCalibration$DATA.PRED2[row.names(fullSampleCBICCalibration$DATA.PRED2), 'mu.wre']
-brainChartsDF[row.names(fullSampleCBICCalibration$DATA.PRED2), 'sigma.wre'] <- fullSampleCBICCalibration$DATA.PRED2[row.names(fullSampleCBICCalibration$DATA.PRED2), "sigma.wre"]
-brainChartsDF[row.names(fullSampleCBICCalibration$DATA.PRED2), 'nu.wre'] <- fullSampleCBICCalibration$DATA.PRED2[row.names(fullSampleCBICCalibration$DATA.PRED2), "nu.wre"]
-
-# brainChartsDF[row.names(fullSampleCUNYCalibration$DATA.PRED2), 'mu.wre'] <- fullSampleCUNYCalibration$DATA.PRED2[row.names(fullSampleCUNYCalibration$DATA.PRED2), "mu.wre"]
-# brainChartsDF[row.names(fullSampleCUNYCalibration$DATA.PRED2), 'sigma.wre'] <- fullSampleCUNYCalibration$DATA.PRED2[row.names(fullSampleCUNYCalibration$DATA.PRED2), "sigma.wre"]
-# brainChartsDF[row.names(fullSampleCUNYCalibration$DATA.PRED2), 'nu.wre'] <- fullSampleCUNYCalibration$DATA.PRED2[row.names(fullSampleCUNYCalibration$DATA.PRED2), "nu.wre"]
-
-# brainChartsDF[row.names(fullSampleRUCalibration$DATA.PRED2), 'mu.wre'] <- fullSampleRUCalibration$DATA.PRED2[row.names(fullSampleRUCalibration$DATA.PRED2), "mu.wre"]
-# brainChartsDF[row.names(fullSampleRUCalibration$DATA.PRED2), 'sigma.wre'] <- fullSampleRUCalibration$DATA.PRED2[row.names(fullSampleRUCalibration$DATA.PRED2), "sigma.wre"]
-# brainChartsDF[row.names(fullSampleRUCalibration$DATA.PRED2), 'nu.wre'] <- fullSampleRUCalibration$DATA.PRED2[row.names(fullSampleRUCalibration$DATA.PRED2), "nu.wre"]
-
-# brainChartsDF[row.names(fullSampleSICalibration$DATA.PRED2), 'mu.wre'] <- fullSampleSICalibration$DATA.PRED2[row.names(fullSampleSICalibration$DATA.PRED2), "mu.wre"]
-# brainChartsDF[row.names(fullSampleSICalibration$DATA.PRED2), 'sigma.wre'] <- fullSampleSICalibration$DATA.PRED2[row.names(fullSampleSICalibration$DATA.PRED2), "sigma.wre"]
-# brainChartsDF[row.names(fullSampleSICalibration$DATA.PRED2), 'nu.wre'] <- fullSampleSICalibration$DATA.PRED2[row.names(fullSampleSICalibration$DATA.PRED2), "nu.wre"]
-
-# generate a new table with altered distribution parameters
-brainChartsDFFake <- brainChartsDF
-
-# add timepoint effects
-muNudge <- 0.1
-sigmaNudge <- 0.1
-brainChartsDFFake$mu.wre <- brainChartsDF$mu.wre + muNudge
-brainChartsDFFake$sigma.wre <- brainChartsDF$sigma.wre + sigmaNudge
-
-# add a year to the ages and some randomness
-brainChartsDFFake$age_days <- brainChartsDFFake$age_days + 365.25 + abs(rnorm(nrow(brainChartsDFFake), mean = 0, sd = 10))
-# generate variables from altered distributions
-brainChartsDFFake$CT <- rGGalt(nrow(brainChartsDFFake), exp(brainChartsDFFake$mu.wre), exp(brainChartsDFFake$sigma.wre), brainChartsDFFake$nu.wre) * 10000
-
-brainChartsDFFake$study <- paste0(brainChartsDFFake$study, "2")
-
-n <- 50
-subFakeCBIC <- filter(brainChartsDFFake, study == "HBNCBIC2")
-P <- randperm(1:nrow(subFakeCBIC))
-subFakeCBIC <- subFakeCBIC[P[1:n],]
-# subFakeCUNY <- filter(brainChartsDFFake, study == "HBNCUNY2")
-# P <- randperm(1:nrow(subFakeCUNY))
-# subFakeCUNY <- subFakeCUNY[P[1:n],]
-# subFakeRU <- filter(brainChartsDFFake, study == "HBNRU2")
-# P <- randperm(1:nrow(subFakeRU))
-# subFakeRU <- subFakeRU[P[1:n],]
-# subFakeSI <- filter(brainChartsDFFake, study == "HBNSI2")
-# P <- randperm(1:nrow(subFakeSI))
-# subFakeSI <- subFakeSI[P[1:n],]
-
-subFakeCBICQuantileCalibration <- calibrateBrainChartsIDQuantilePenalty(subFakeCBIC, phenotype = "CT", largeSiteOutput = fullSampleCBICCalibration)
-# subFakeCUNYQuantileCalibration <- calibrateBrainChartsIDQuantilePenalty(subFakeCUNY, phenotype = "CT", largeSiteOutput = fullSampleCUNYCalibration)
-# subFakeSIQuantileCalibration <- calibrateBrainChartsIDQuantilePenalty(subFakeSI, phenotype = "CT", largeSiteOutput = fullSampleSICalibration)
-# subFakeRUQuantileCalibration <- calibrateBrainChartsIDQuantilePenalty(subFakeRU, phenotype = "CT", largeSiteOutput = fullSampleRUCalibration)
+subFakeCBICQuantileCalibration <- 
+  calibrateBrainChartsIDQuantilePenalty(subFakeCBIC, phenotype = "CT", 
+                                        largeSiteOutput = fullSampleCBICCalibration)
