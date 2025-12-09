@@ -1,3 +1,12 @@
 project:
   type: website
   output-dir: docs
+  render:
+    - calibration_example.qmd
+    - calibration_accuracy.qmd
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
