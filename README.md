@@ -47,8 +47,8 @@ This imports all required scripts from the Braincharts software.
 
 Please find tutorials on how to use the software at these links as follows:
 
-- [calibration_example.qmd](calibration_example.qmd): Data set up and calibration for a small site calibration using the Healthy Brain Network dataset [[2]](#2).
-- [calibration_example_hbn_accuracy.qmd](calibration_example_hbn_accuracy.qmd): An evaluation of the accuracy of this centile-informed method on a small sample using the public Healthy Brain Network dataset [[2]](#2).
+- [Calibration example](https://nchadataplatform.github.io/brainchartscentiles/calibration_example.html): Data set up and calibration for a small site calibration using the Healthy Brain Network dataset [[2]](#2).
+- [calibration accuracy evaluation](https://nchadataplatform.github.io/brainchartscentiles/calibration_accuracy.html): An evaluation of the accuracy of this centile-informed method on a small sample using the public Healthy Brain Network dataset [[2]](#2).
 
 # References
 
