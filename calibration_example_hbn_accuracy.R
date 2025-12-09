@@ -4,7 +4,6 @@ library(tidyverse)
 library(pracma)
 source('calibration_example_hbn.R')
 brainChartsDF <- data.frame(brainChartsDF)
-brainChartsDFFake <- data.frame(brainChartsDFFake)
 brainChartsDF$mu.wre <- NA
 brainChartsDF$sigma.wre <- NA
 brainChartsDF$nu.wre <- NA
@@ -68,10 +67,10 @@ subFakeSI <- subFakeSI[P[1:n],]
 
 # run the centile-informed calibration
 
-subFakeCBICQuantileCalibration <- calibrateBrainChartsIDQuantilePenalty(subFakeCBIC, phenotype = "CT", largeSiteOutput = fullSampleCBIC)
-subFakeCUNYQuantileCalibration <- calibrateBrainChartsIDQuantilePenalty(subFakeCUNY, phenotype = "CT", largeSiteOutput = fullSampleCUNY)
-subFakeSIQuantileCalibration <- calibrateBrainChartsIDQuantilePenalty(subFakeSI, phenotype = "CT", largeSiteOutput = fullSampleSI)
-subFakeRUQuantileCalibration <- calibrateBrainChartsIDQuantilePenalty(subFakeRU, phenotype = "CT", largeSiteOutput = fullSampleRU)
+subFakeCBICQuantileCalibration <- calibrateBrainChartsIDQuantilePenalty(subFakeCBIC, phenotype = "CT", largeSiteOutput = fullSampleCBICCalibration)
+subFakeCUNYQuantileCalibration <- calibrateBrainChartsIDQuantilePenalty(subFakeCUNY, phenotype = "CT", largeSiteOutput = fullSampleCUNYCalibration)
+subFakeSIQuantileCalibration <- calibrateBrainChartsIDQuantilePenalty(subFakeSI, phenotype = "CT", largeSiteOutput = fullSampleSICalibration)
+subFakeRUQuantileCalibration <- calibrateBrainChartsIDQuantilePenalty(subFakeRU, phenotype = "CT", largeSiteOutput = fullSampleRUCalibration)
 
 # run the normal Braincharts calibration on the small sites 
 subFakeCBICCalibration <- calibrateBrainCharts(subFakeCBIC, phenotype = "CT")
