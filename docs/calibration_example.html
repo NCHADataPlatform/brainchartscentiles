@@ -163,7 +163,6 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#study-overview" id="toc-study-overview" class="nav-link" data-scroll-target="#study-overview">Study overview</a></li>
   <li><a href="#calibration-phase-1" id="toc-calibration-phase-1" class="nav-link" data-scroll-target="#calibration-phase-1">Calibration, Phase 1</a></li>
-  <li><a href="#calibration-phase-2" id="toc-calibration-phase-2" class="nav-link" data-scroll-target="#calibration-phase-2">Calibration, Phase 2</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -399,77 +398,157 @@ Attaching package: 'pracma'</code></pre>
 7 HBNSI   Male     195
 8 HBNSI   Female   146</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">row.names</span>(brainChartsDF) <span class="ot">&lt;-</span> brainChartsDF<span class="sc">$</span>ID</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>brainChartsDF <span class="ot">&lt;-</span> <span class="fu">filter</span>(brainChartsDF, study <span class="sc">==</span> <span class="st">"HBNCBIC"</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>brainChartsDF <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(brainChartsDF)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="fu">row.names</span>(brainChartsDF) <span class="ot">&lt;-</span> brainChartsDF<span class="sc">$</span>ID</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>phenotype <span class="ot">&lt;-</span> <span class="st">"CT"</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="co"># do the full sample calibrations per site</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>fullSampleCBICCalibration <span class="ot">&lt;-</span> <span class="fu">calibrateBrainCharts</span>(<span class="fu">filter</span>(brainChartsDF, study <span class="sc">==</span> <span class="st">"HBNCBIC"</span>), <span class="at">phenotype =</span> phenotype)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>Warning: Setting row names on a tibble is deprecated.</code></pre>
+<pre><code>Warning in model.matrix.default(Model.Formula, Model.Frame, contrasts.arg =
+FITParam$contrasts, : variable 'fs_version' is absent, its contrast will be
+ignored
+Warning in model.matrix.default(Model.Formula, Model.Frame, contrasts.arg =
+FITParam$contrasts, : variable 'fs_version' is absent, its contrast will be
+ignored</code></pre>
 </div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># fullSampleCUNYCalibration &lt;- calibrateBrainCharts(filter(brainChartsDF, study == "HBNCUNY"), phenotype = phenotype)</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="co"># fullSampleSICalibration &lt;- calibrateBrainCharts(filter(brainChartsDF, study == "HBNSI"), phenotype = phenotype)</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="co"># fullSampleRUCalibration &lt;- calibrateBrainCharts(filter(brainChartsDF, study == "HBNRU"), phenotype = phenotype)</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="fu">row.names</span>(fullSampleCBICCalibration<span class="sc">$</span>DATA.PRED2) <span class="ot">&lt;-</span> fullSampleCBICCalibration<span class="sc">$</span>DATA.PRED2<span class="sc">$</span>ID</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="co"># row.names(fullSampleCUNYCalibration$DATA.PRED2) &lt;- fullSampleCUNYCalibration$DATA.PRED2$ID</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="co"># row.names(fullSampleSICalibration$DATA.PRED2) &lt;- fullSampleSICalibration$DATA.PRED2$ID</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="co"># row.names(fullSampleRUCalibration$DATA.PRED2) &lt;- fullSampleRUCalibration$DATA.PRED2$ID</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>brainChartsDF<span class="sc">$</span>mu.wre <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>brainChartsDF<span class="sc">$</span>sigma.wre <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>brainChartsDF<span class="sc">$</span>nu.wre <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="fu">row.names</span>(brainChartsDF) <span class="ot">&lt;-</span> brainChartsDF<span class="sc">$</span>ID</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>brainChartsDF[<span class="fu">row.names</span>(fullSampleCBICCalibration<span class="sc">$</span>DATA.PRED2), <span class="st">'mu.wre'</span>] <span class="ot">&lt;-</span> fullSampleCBICCalibration<span class="sc">$</span>DATA.PRED2[<span class="fu">row.names</span>(fullSampleCBICCalibration<span class="sc">$</span>DATA.PRED2), <span class="st">'mu.wre'</span>]</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>brainChartsDF[<span class="fu">row.names</span>(fullSampleCBICCalibration<span class="sc">$</span>DATA.PRED2), <span class="st">'sigma.wre'</span>] <span class="ot">&lt;-</span> fullSampleCBICCalibration<span class="sc">$</span>DATA.PRED2[<span class="fu">row.names</span>(fullSampleCBICCalibration<span class="sc">$</span>DATA.PRED2), <span class="st">"sigma.wre"</span>]</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>brainChartsDF[<span class="fu">row.names</span>(fullSampleCBICCalibration<span class="sc">$</span>DATA.PRED2), <span class="st">'nu.wre'</span>] <span class="ot">&lt;-</span> fullSampleCBICCalibration<span class="sc">$</span>DATA.PRED2[<span class="fu">row.names</span>(fullSampleCBICCalibration<span class="sc">$</span>DATA.PRED2), <span class="st">"nu.wre"</span>]</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a><span class="co"># brainChartsDF[row.names(fullSampleCUNYCalibration$DATA.PRED2), 'mu.wre'] &lt;- fullSampleCUNYCalibration$DATA.PRED2[row.names(fullSampleCUNYCalibration$DATA.PRED2), "mu.wre"]</span></span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a><span class="co"># brainChartsDF[row.names(fullSampleCUNYCalibration$DATA.PRED2), 'sigma.wre'] &lt;- fullSampleCUNYCalibration$DATA.PRED2[row.names(fullSampleCUNYCalibration$DATA.PRED2), "sigma.wre"]</span></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a><span class="co"># brainChartsDF[row.names(fullSampleCUNYCalibration$DATA.PRED2), 'nu.wre'] &lt;- fullSampleCUNYCalibration$DATA.PRED2[row.names(fullSampleCUNYCalibration$DATA.PRED2), "nu.wre"]</span></span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a><span class="co"># brainChartsDF[row.names(fullSampleRUCalibration$DATA.PRED2), 'mu.wre'] &lt;- fullSampleRUCalibration$DATA.PRED2[row.names(fullSampleRUCalibration$DATA.PRED2), "mu.wre"]</span></span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a><span class="co"># brainChartsDF[row.names(fullSampleRUCalibration$DATA.PRED2), 'sigma.wre'] &lt;- fullSampleRUCalibration$DATA.PRED2[row.names(fullSampleRUCalibration$DATA.PRED2), "sigma.wre"]</span></span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a><span class="co"># brainChartsDF[row.names(fullSampleRUCalibration$DATA.PRED2), 'nu.wre'] &lt;- fullSampleRUCalibration$DATA.PRED2[row.names(fullSampleRUCalibration$DATA.PRED2), "nu.wre"]</span></span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a><span class="co"># brainChartsDF[row.names(fullSampleSICalibration$DATA.PRED2), 'mu.wre'] &lt;- fullSampleSICalibration$DATA.PRED2[row.names(fullSampleSICalibration$DATA.PRED2), "mu.wre"]</span></span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a><span class="co"># brainChartsDF[row.names(fullSampleSICalibration$DATA.PRED2), 'sigma.wre'] &lt;- fullSampleSICalibration$DATA.PRED2[row.names(fullSampleSICalibration$DATA.PRED2), "sigma.wre"]</span></span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a><span class="co"># brainChartsDF[row.names(fullSampleSICalibration$DATA.PRED2), 'nu.wre'] &lt;- fullSampleSICalibration$DATA.PRED2[row.names(fullSampleSICalibration$DATA.PRED2), "nu.wre"]</span></span>
+<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a><span class="co"># generate a new table with altered distribution parameters</span></span>
+<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a>brainChartsDFFake <span class="ot">&lt;-</span> brainChartsDF</span>
+<span id="cb17-33"><a href="#cb17-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-34"><a href="#cb17-34" aria-hidden="true" tabindex="-1"></a><span class="co"># add timepoint effects</span></span>
+<span id="cb17-35"><a href="#cb17-35" aria-hidden="true" tabindex="-1"></a>muNudge <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
+<span id="cb17-36"><a href="#cb17-36" aria-hidden="true" tabindex="-1"></a>sigmaNudge <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
+<span id="cb17-37"><a href="#cb17-37" aria-hidden="true" tabindex="-1"></a>brainChartsDFFake<span class="sc">$</span>mu.wre <span class="ot">&lt;-</span> brainChartsDF<span class="sc">$</span>mu.wre <span class="sc">+</span> muNudge</span>
+<span id="cb17-38"><a href="#cb17-38" aria-hidden="true" tabindex="-1"></a>brainChartsDFFake<span class="sc">$</span>sigma.wre <span class="ot">&lt;-</span> brainChartsDF<span class="sc">$</span>sigma.wre <span class="sc">+</span> sigmaNudge</span>
+<span id="cb17-39"><a href="#cb17-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-40"><a href="#cb17-40" aria-hidden="true" tabindex="-1"></a><span class="co"># add a year to the ages and some randomness</span></span>
+<span id="cb17-41"><a href="#cb17-41" aria-hidden="true" tabindex="-1"></a>brainChartsDFFake<span class="sc">$</span>age_days <span class="ot">&lt;-</span> brainChartsDFFake<span class="sc">$</span>age_days <span class="sc">+</span> <span class="fl">365.25</span> <span class="sc">+</span> <span class="fu">abs</span>(<span class="fu">rnorm</span>(<span class="fu">nrow</span>(brainChartsDFFake), <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">10</span>))</span>
+<span id="cb17-42"><a href="#cb17-42" aria-hidden="true" tabindex="-1"></a><span class="co"># generate variables from altered distributions</span></span>
+<span id="cb17-43"><a href="#cb17-43" aria-hidden="true" tabindex="-1"></a>brainChartsDFFake<span class="sc">$</span>CT <span class="ot">&lt;-</span> <span class="fu">rGGalt</span>(<span class="fu">nrow</span>(brainChartsDFFake), <span class="fu">exp</span>(brainChartsDFFake<span class="sc">$</span>mu.wre), <span class="fu">exp</span>(brainChartsDFFake<span class="sc">$</span>sigma.wre), brainChartsDFFake<span class="sc">$</span>nu.wre) <span class="sc">*</span> <span class="dv">10000</span></span>
+<span id="cb17-44"><a href="#cb17-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-45"><a href="#cb17-45" aria-hidden="true" tabindex="-1"></a>brainChartsDFFake<span class="sc">$</span>study <span class="ot">&lt;-</span> <span class="fu">paste0</span>(brainChartsDFFake<span class="sc">$</span>study, <span class="st">"2"</span>)</span>
+<span id="cb17-46"><a href="#cb17-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-47"><a href="#cb17-47" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">50</span></span>
+<span id="cb17-48"><a href="#cb17-48" aria-hidden="true" tabindex="-1"></a>subFakeCBIC <span class="ot">&lt;-</span> <span class="fu">filter</span>(brainChartsDFFake, study <span class="sc">==</span> <span class="st">"HBNCBIC2"</span>)</span>
+<span id="cb17-49"><a href="#cb17-49" aria-hidden="true" tabindex="-1"></a>P <span class="ot">&lt;-</span> <span class="fu">randperm</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(subFakeCBIC))</span>
+<span id="cb17-50"><a href="#cb17-50" aria-hidden="true" tabindex="-1"></a>subFakeCBIC <span class="ot">&lt;-</span> subFakeCBIC[P[<span class="dv">1</span><span class="sc">:</span>n],]</span>
+<span id="cb17-51"><a href="#cb17-51" aria-hidden="true" tabindex="-1"></a><span class="co"># subFakeCUNY &lt;- filter(brainChartsDFFake, study == "HBNCUNY2")</span></span>
+<span id="cb17-52"><a href="#cb17-52" aria-hidden="true" tabindex="-1"></a><span class="co"># P &lt;- randperm(1:nrow(subFakeCUNY))</span></span>
+<span id="cb17-53"><a href="#cb17-53" aria-hidden="true" tabindex="-1"></a><span class="co"># subFakeCUNY &lt;- subFakeCUNY[P[1:n],]</span></span>
+<span id="cb17-54"><a href="#cb17-54" aria-hidden="true" tabindex="-1"></a><span class="co"># subFakeRU &lt;- filter(brainChartsDFFake, study == "HBNRU2")</span></span>
+<span id="cb17-55"><a href="#cb17-55" aria-hidden="true" tabindex="-1"></a><span class="co"># P &lt;- randperm(1:nrow(subFakeRU))</span></span>
+<span id="cb17-56"><a href="#cb17-56" aria-hidden="true" tabindex="-1"></a><span class="co"># subFakeRU &lt;- subFakeRU[P[1:n],]</span></span>
+<span id="cb17-57"><a href="#cb17-57" aria-hidden="true" tabindex="-1"></a><span class="co"># subFakeSI &lt;- filter(brainChartsDFFake, study == "HBNSI2")</span></span>
+<span id="cb17-58"><a href="#cb17-58" aria-hidden="true" tabindex="-1"></a><span class="co"># P &lt;- randperm(1:nrow(subFakeSI))</span></span>
+<span id="cb17-59"><a href="#cb17-59" aria-hidden="true" tabindex="-1"></a><span class="co"># subFakeSI &lt;- subFakeSI[P[1:n],]</span></span>
+<span id="cb17-60"><a href="#cb17-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-61"><a href="#cb17-61" aria-hidden="true" tabindex="-1"></a>subFakeCBICQuantileCalibration <span class="ot">&lt;-</span> <span class="fu">calibrateBrainChartsIDQuantilePenalty</span>(subFakeCBIC, <span class="at">phenotype =</span> <span class="st">"CT"</span>, <span class="at">largeSiteOutput =</span> fullSampleCBICCalibration)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in model.matrix.default(Model.Formula, Model.Frame, contrasts.arg =
+FITParam$contrasts, : variable 'fs_version' is absent, its contrast will be
+ignored
+Warning in model.matrix.default(Model.Formula, Model.Frame, contrasts.arg =
+FITParam$contrasts, : variable 'fs_version' is absent, its contrast will be
+ignored</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># subFakeCUNYQuantileCalibration &lt;- calibrateBrainChartsIDQuantilePenalty(subFakeCUNY, phenotype = "CT", largeSiteOutput = fullSampleCUNYCalibration)</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="co"># subFakeSIQuantileCalibration &lt;- calibrateBrainChartsIDQuantilePenalty(subFakeSI, phenotype = "CT", largeSiteOutput = fullSampleSICalibration)</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="co"># subFakeRUQuantileCalibration &lt;- calibrateBrainChartsIDQuantilePenalty(subFakeRU, phenotype = "CT", largeSiteOutput = fullSampleRUCalibration)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="calibration-phase-1" class="level2">
 <h2 class="anchored" data-anchor-id="calibration-phase-1">Calibration, Phase 1</h2>
 <p>Phase 1 of calibration is the standard, cross sectional, version proposed in the original BrainCharts paper. We show cortical thickness as the IDP of interest. We perform this on a per-study basis, since each study represents a single sample. We will only show one site (CBIC), since we only require one site to illustrate usage.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>phenotype <span class="ot">&lt;-</span> <span class="st">"CT"</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="co"># do the full sample calibrations per site</span></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>fullSampleCBICCalibration <span class="ot">&lt;-</span> <span class="fu">calibrateBrainCharts</span>(<span class="fu">filter</span>(brainChartsDF, study <span class="sc">==</span> <span class="st">"HBNCBIC"</span>), <span class="at">phenotype =</span> phenotype)</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>fullSampleCUNYCalibration <span class="ot">&lt;-</span> <span class="fu">calibrateBrainCharts</span>(<span class="fu">filter</span>(brainChartsDF, study <span class="sc">==</span> <span class="st">"HBNCUNY"</span>), <span class="at">phenotype =</span> phenotype)</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>fullSampleSICalibration <span class="ot">&lt;-</span> <span class="fu">calibrateBrainCharts</span>(<span class="fu">filter</span>(brainChartsDF, study <span class="sc">==</span> <span class="st">"HBNSI"</span>), <span class="at">phenotype =</span> phenotype)</span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>fullSampleRUCalibration <span class="ot">&lt;-</span> <span class="fu">calibrateBrainCharts</span>(<span class="fu">filter</span>(brainChartsDF, study <span class="sc">==</span> <span class="st">"HBNRU"</span>), <span class="at">phenotype =</span> phenotype)</span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="fu">row.names</span>(fullSampleCBICCalibration<span class="sc">$</span>DATA.PRED2) <span class="ot">&lt;-</span> fullSampleCBICCalibration<span class="sc">$</span>DATA.PRED2<span class="sc">$</span>ID</span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="fu">row.names</span>(fullSampleCUNYCalibration<span class="sc">$</span>DATA.PRED2) <span class="ot">&lt;-</span> fullSampleCUNYCalibration<span class="sc">$</span>DATA.PRED2<span class="sc">$</span>ID</span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="fu">row.names</span>(fullSampleSICalibration<span class="sc">$</span>DATA.PRED2) <span class="ot">&lt;-</span> fullSampleSICalibration<span class="sc">$</span>DATA.PRED2<span class="sc">$</span>ID</span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="fu">row.names</span>(fullSampleRUCalibration<span class="sc">$</span>DATA.PRED2) <span class="ot">&lt;-</span> fullSampleRUCalibration<span class="sc">$</span>DATA.PRED2<span class="sc">$</span>ID</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>brainChartsDF <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(brainChartsDF)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>brainChartsDF <span class="ot">&lt;-</span> <span class="fu">filter</span>(brainChartsDF, study <span class="sc">==</span> <span class="st">"HBNCBIC"</span>)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="fu">row.names</span>(brainChartsDF) <span class="ot">&lt;-</span> brainChartsDF<span class="sc">$</span>participant</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>fullSampleCBICCalibration <span class="ot">&lt;-</span> <span class="fu">calibrateBrainCharts</span>(brainChartsDF, <span class="at">phenotype =</span> <span class="st">"CT"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The results data structure will be described, this is purely for reference. The dataframe <em>fullSampleCBICCalibration</em> is the output</p>
 <ul>
-<li><em>fullSampleCBICCalibration<span class="math inline">\(expanded*: The model parameters
-  - *fullSampleCBICCalibration\)</span>expanded<span class="math inline">\(mu\)</span>ranef</em>: The <span class="math inline">\(\mu\)</span> site-effect estimates. The user-provided study name will be the estimated effect for the sample, i.e.&nbsp;fullSampleCBICCalibration<span class="math inline">\(expanded\)</span>mu<span class="math inline">\(ranef[['HBNCBIC']]
-  - *fullSampleCBICCalibration\)</span>expanded<span class="math inline">\(sigma\)</span>ranef*: The <span class="math inline">\(\mu\)</span> site-effect estimates. The user-provided study name will be the estimated effect for the sample, i.e.&nbsp;fullSampleCBICCalibration<span class="math inline">\(expanded\)</span>mu$ranef[[‘HBNCBIC’]]</li>
-<li><em>fullSampleCBICCalibration$DATA.PRED</em>: The data with predicted values from the model <em>before</em> calibration</li>
-<li><em>fullSampleCBICCalibration<span class="math inline">\(DATA.PRED2*: The data with predicted values for parameters *after* calibration
-  - *fullSampleCBICCalibration\)</span>DATA.PRED2$meanCT2transformed</em></li>
+<li><code>fullSampleCBICCalibration$expanded</code>: The model parameters
+<ul>
+<li><code>fullSampleCBICCalibration$expanded$mu$ranef</code>: The <span class="math inline">\(\mu\)</span> site-effect estimates. The user-provided study name will be the estimated effect for the sample, in this example it is <code>fullSampleCBICCalibration$expanded$mu$ranef[['HBNCBIC']]</code></li>
+<li><code>fullSampleCBICCalibration$expanded$sigma$ranef</code>: The <span class="math inline">\(\mu\)</span> site-effect estimates. The user-provided study name will be the estimated effect for the sample, in this example it is <code>fullSampleCBICCalibration$expanded$mu$ranef[['HBNCBIC']]</code></li>
+</ul></li>
+<li><code>fullSampleCBICCalibration$DATA.PRED</code>: The data with predicted values from the model <em>before</em> calibration</li>
+<li><code>fullSampleCBICCalibration$DATA.PRED2</code>: The data with predicted values for parameters <em>after</em> calibration
+<ul>
+<li><code>fullSampleCBICCalibration$DATA.PRED2$meanCT2transformed</code>: the transformed cortical thickness values</li>
+<li><code>fullSampleCBICCalibration$DATA.PRED2$mu.wre</code>: the estimated <span class="math inline">\(\mu\)</span> for each measurement</li>
+<li><code>fullSampleCBICCalibration$DATA.PRED2$sigma.wre</code>: the estimated <span class="math inline">\(\sigma\)</span> for each measurement</li>
+<li><code>fullSampleCBICCalibration$DATA.PRED2$PRED.l250.wre</code>: the estimated 0.25 centile for each measurement</li>
+<li><code>fullSampleCBICCalibration$DATA.PRED2$PRED.m500.wre</code>: the estimated 0.5 (median) centile for each measurement</li>
+<li><code>fullSampleCBICCalibration$DATA.PRED2$PRED.u750.wre</code>: the estimated 0.75 centile for each measurement</li>
+</ul></li>
 </ul>
-</section>
-<section id="calibration-phase-2" class="level2">
-<h2 class="anchored" data-anchor-id="calibration-phase-2">Calibration, Phase 2</h2>
-<p>Phase 2 of calibration is the “small” sample calibration. For this example, we have to simulate a “small” repeated-measures sample. To do this we create a synthetic, longitudinal follow up sample with slightly altered parameters. The code is presented here but wouldn’t apply in a real-world exmaple</p>
+<p>ggsave(‘freesurfer_example_hbn_CBIC.png’) ## Calibration, Phase 2 Phase 2 of calibration is the “small” sample calibration. For this example, we have to simulate a “small” repeated-measures sample. To do this we create a synthetic, longitudinal follow up sample with slightly altered parameters. The code is presented here but wouldn’t apply in a real-world exmaple</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>brainChartsDF <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(brainChartsDF)</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">row.names</span>(brainChartsDF) <span class="ot">&lt;-</span> brainChartsDF<span class="sc">$</span>ID</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>brainChartsDF<span class="sc">$</span>mu.wre <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>brainChartsDF<span class="sc">$</span>sigma.wre <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>brainChartsDF<span class="sc">$</span>nu.wre <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>brainChartsDF[<span class="fu">row.names</span>(fullSampleCBICCalibration<span class="sc">$</span>DATA.PRED2), <span class="st">'mu.wre'</span>] <span class="ot">&lt;-</span> fullSampleCBICCalibration<span class="sc">$</span>DATA.PRED2<span class="sc">$</span>mu.wre</span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>brainChartsDF[<span class="fu">row.names</span>(fullSampleCBICCalibration<span class="sc">$</span>DATA.PRED2), <span class="st">'sigma.wre'</span>] <span class="ot">&lt;-</span> fullSampleCBICCalibration<span class="sc">$</span>DATA.PRED2<span class="sc">$</span>sigma.wre</span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>brainChartsDF[<span class="fu">row.names</span>(fullSampleCBICCalibration<span class="sc">$</span>DATA.PRED2), <span class="st">'nu.wre'</span>] <span class="ot">&lt;-</span> fullSampleCBICCalibration<span class="sc">$</span>DATA.PRED2<span class="sc">$</span>nu.wre</span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>brainChartsDF <span class="ot">&lt;-</span> <span class="fu">filter</span>(brainChartsDF, study <span class="sc">==</span> <span class="st">"HBNCBIC"</span>)</span>
-<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a><span class="co"># generate a new table with altered distribution parameters</span></span>
-<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>brainChartsDFFake <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(brainChartsDF)</span>
-<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a><span class="co"># add timepoint effects</span></span>
-<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>muNudge <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
-<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>sigmaNudge <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
-<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>brainChartsDFFake<span class="sc">$</span>mu.wre <span class="ot">&lt;-</span> brainChartsDF<span class="sc">$</span>mu.wre <span class="sc">+</span> muNudge</span>
-<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>brainChartsDFFake<span class="sc">$</span>sigma.wre <span class="ot">&lt;-</span> brainChartsDF<span class="sc">$</span>sigma.wre <span class="sc">+</span> sigmaNudge</span>
-<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a><span class="co"># add a year to the ages and some randomness</span></span>
-<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>brainChartsDFFake<span class="sc">$</span>age_days <span class="ot">&lt;-</span> brainChartsDFFake<span class="sc">$</span>age_days <span class="sc">+</span> <span class="fl">365.25</span> <span class="sc">+</span> <span class="fu">abs</span>(<span class="fu">rnorm</span>(<span class="fu">nrow</span>(brainChartsDFFake), <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">10</span>))</span>
-<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a><span class="co"># generate variables from altered distributions</span></span>
-<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>brainChartsDFFake<span class="sc">$</span>CT <span class="ot">&lt;-</span> <span class="fu">rGGalt</span>(<span class="fu">nrow</span>(brainChartsDFFake), <span class="fu">exp</span>(brainChartsDFFake<span class="sc">$</span>mu.wre), <span class="fu">exp</span>(brainChartsDFFake<span class="sc">$</span>sigma.wre), brainChartsDFFake<span class="sc">$</span>nu.wre) <span class="sc">*</span> <span class="dv">10000</span></span>
-<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a><span class="co"># add "2" to the study name to make it a new sample</span></span>
-<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>brainChartsDFFake<span class="sc">$</span>study <span class="ot">&lt;-</span> <span class="fu">paste0</span>(brainChartsDFFake<span class="sc">$</span>study, <span class="st">"2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>brainChartsDF<span class="sc">$</span>mu.wre <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>brainChartsDF<span class="sc">$</span>sigma.wre <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>brainChartsDF<span class="sc">$</span>nu.wre <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>brainChartsDF[<span class="fu">row.names</span>(fullSampleCBICCalibration<span class="sc">$</span>DATA.PRED2), <span class="st">'mu.wre'</span>] <span class="ot">&lt;-</span> fullSampleCBICCalibration<span class="sc">$</span>DATA.PRED2<span class="sc">$</span>mu.wre</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>brainChartsDF[<span class="fu">row.names</span>(fullSampleCBICCalibration<span class="sc">$</span>DATA.PRED2), <span class="st">'sigma.wre'</span>] <span class="ot">&lt;-</span> fullSampleCBICCalibration<span class="sc">$</span>DATA.PRED2<span class="sc">$</span>sigma.wre</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>brainChartsDF[<span class="fu">row.names</span>(fullSampleCBICCalibration<span class="sc">$</span>DATA.PRED2), <span class="st">'nu.wre'</span>] <span class="ot">&lt;-</span> fullSampleCBICCalibration<span class="sc">$</span>DATA.PRED2<span class="sc">$</span>nu.wre</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>brainChartsDF <span class="ot">&lt;-</span> <span class="fu">filter</span>(brainChartsDF, study <span class="sc">==</span> <span class="st">"HBNCBIC"</span>)</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="co"># generate a new table with altered distribution parameters</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>brainChartsDFFake <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(brainChartsDF)</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a><span class="co"># add timepoint effects</span></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>muNudge <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>sigmaNudge <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>brainChartsDFFake<span class="sc">$</span>mu.wre <span class="ot">&lt;-</span> brainChartsDF<span class="sc">$</span>mu.wre <span class="sc">+</span> muNudge</span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>brainChartsDFFake<span class="sc">$</span>sigma.wre <span class="ot">&lt;-</span> brainChartsDF<span class="sc">$</span>sigma.wre <span class="sc">+</span> sigmaNudge</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a><span class="co"># add a year to the ages and some randomness</span></span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>brainChartsDFFake<span class="sc">$</span>age_days <span class="ot">&lt;-</span> brainChartsDFFake<span class="sc">$</span>age_days <span class="sc">+</span> <span class="fl">365.25</span> <span class="sc">+</span> <span class="fu">abs</span>(<span class="fu">rnorm</span>(<span class="fu">nrow</span>(brainChartsDFFake), <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">10</span>))</span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a><span class="co"># generate variables from altered distributions</span></span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>brainChartsDFFake<span class="sc">$</span>CT <span class="ot">&lt;-</span> <span class="fu">rGGalt</span>(<span class="fu">nrow</span>(brainChartsDFFake), <span class="fu">exp</span>(brainChartsDFFake<span class="sc">$</span>mu.wre), <span class="fu">exp</span>(brainChartsDFFake<span class="sc">$</span>sigma.wre), brainChartsDFFake<span class="sc">$</span>nu.wre) <span class="sc">*</span> <span class="dv">10000</span></span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a><span class="co"># add "2" to the study name to make it a new sample</span></span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>brainChartsDFFake<span class="sc">$</span>study <span class="ot">&lt;-</span> <span class="fu">paste0</span>(brainChartsDFFake<span class="sc">$</span>study, <span class="st">"2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Now, we select a random subsample of the CBIC study from the synthetic timepoint.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">50</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>subFakeCBIC <span class="ot">&lt;-</span> <span class="fu">filter</span>(brainChartsDFFake, study <span class="sc">==</span> <span class="st">"HBNCBIC2"</span>)</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>P <span class="ot">&lt;-</span> <span class="fu">randperm</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(subFakeCBIC))</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>subFakeCBIC <span class="ot">&lt;-</span> subFakeCBIC[P[<span class="dv">1</span><span class="sc">:</span>n],]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">50</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>subFakeCBIC <span class="ot">&lt;-</span> <span class="fu">filter</span>(brainChartsDFFake, study <span class="sc">==</span> <span class="st">"HBNCBIC2"</span>)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>P <span class="ot">&lt;-</span> <span class="fu">randperm</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(subFakeCBIC))</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>subFakeCBIC <span class="ot">&lt;-</span> subFakeCBIC[P[<span class="dv">1</span><span class="sc">:</span>n],]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Here, <code>subFakeCBIC</code> would represent the “small” sample an investigator is wishing to calibrate. We calibrate this sample using the centile-informed repeated measures method, using the large site calibration output previously computed as follows:</p>
 <pre><code>subFakeCBICOutQuantile &lt;- calibrateBrainChartsIDQuantilePenalty(subFakeCBIC, phenotype = "CT", largeSiteOutput = fullSampleCBICCalibration)</code></pre>

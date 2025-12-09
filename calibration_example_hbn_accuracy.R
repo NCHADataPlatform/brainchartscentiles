@@ -3,80 +3,22 @@
 library(tidyverse)
 library(pracma)
 source('calibration_example_hbn.R')
-brainChartsDF <- data.frame(brainChartsDF)
-brainChartsDF$mu.wre <- NA
-brainChartsDF$sigma.wre <- NA
-brainChartsDF$nu.wre <- NA
-row.names(brainChartsDF) <- brainChartsDF$ID
-
-brainChartsDF[row.names(fullSampleCBICCalibration$DATA.PRED2), 'mu.wre'] <- fullSampleCBICCalibration$DATA.PRED2[row.names(fullSampleCBICCalibration$DATA.PRED2), 'mu.wre']
-brainChartsDF[row.names(fullSampleCBICCalibration$DATA.PRED2), 'sigma.wre'] <- fullSampleCBICCalibration$DATA.PRED2[row.names(fullSampleCBICCalibration$DATA.PRED2), "sigma.wre"]
-brainChartsDF[row.names(fullSampleCBICCalibration$DATA.PRED2), 'nu.wre'] <- fullSampleCBICCalibration$DATA.PRED2[row.names(fullSampleCBICCalibration$DATA.PRED2), "nu.wre"]
-
-brainChartsDF[row.names(fullSampleCUNYCalibration$DATA.PRED2), 'mu.wre'] <- fullSampleCUNYCalibration$DATA.PRED2[row.names(fullSampleCUNYCalibration$DATA.PRED2), "mu.wre"]
-brainChartsDF[row.names(fullSampleCUNYCalibration$DATA.PRED2), 'sigma.wre'] <- fullSampleCUNYCalibration$DATA.PRED2[row.names(fullSampleCUNYCalibration$DATA.PRED2), "sigma.wre"]
-brainChartsDF[row.names(fullSampleCUNYCalibration$DATA.PRED2), 'nu.wre'] <- fullSampleCUNYCalibration$DATA.PRED2[row.names(fullSampleCUNYCalibration$DATA.PRED2), "nu.wre"]
-
-brainChartsDF[row.names(fullSampleRUCalibration$DATA.PRED2), 'mu.wre'] <- fullSampleRUCalibration$DATA.PRED2[row.names(fullSampleRUCalibration$DATA.PRED2), "mu.wre"]
-brainChartsDF[row.names(fullSampleRUCalibration$DATA.PRED2), 'sigma.wre'] <- fullSampleRUCalibration$DATA.PRED2[row.names(fullSampleRUCalibration$DATA.PRED2), "sigma.wre"]
-brainChartsDF[row.names(fullSampleRUCalibration$DATA.PRED2), 'nu.wre'] <- fullSampleRUCalibration$DATA.PRED2[row.names(fullSampleRUCalibration$DATA.PRED2), "nu.wre"]
-
-brainChartsDF[row.names(fullSampleSICalibration$DATA.PRED2), 'mu.wre'] <- fullSampleSICalibration$DATA.PRED2[row.names(fullSampleSICalibration$DATA.PRED2), "mu.wre"]
-brainChartsDF[row.names(fullSampleSICalibration$DATA.PRED2), 'sigma.wre'] <- fullSampleSICalibration$DATA.PRED2[row.names(fullSampleSICalibration$DATA.PRED2), "sigma.wre"]
-brainChartsDF[row.names(fullSampleSICalibration$DATA.PRED2), 'nu.wre'] <- fullSampleSICalibration$DATA.PRED2[row.names(fullSampleSICalibration$DATA.PRED2), "nu.wre"]
-
-# generate a new table with altered distribution parameters
-brainChartsDFFake <- brainChartsDF
-
-# add timepoint effects
-muNudge <- 0.1
-sigmaNudge <- 0.1
-brainChartsDFFake$mu.wre <- brainChartsDF$mu.wre + muNudge
-brainChartsDFFake$sigma.wre <- brainChartsDF$sigma.wre + sigmaNudge
-
-# add a year to the ages and some randomness
-brainChartsDFFake$age_days <- brainChartsDFFake$age_days + 365.25 + abs(rnorm(nrow(brainChartsDFFake), mean = 0, sd = 10))
-# generate variables from altered distributions
-brainChartsDFFake$CT <- rGGalt(nrow(brainChartsDFFake), exp(brainChartsDFFake$mu.wre), exp(brainChartsDFFake$sigma.wre), brainChartsDFFake$nu.wre) * 10000
-
-brainChartsDFFake$study <- paste0(brainChartsDFFake$study, "2")
-
-# calibrate the full fake samples
-# in a normal example, these would be your small samples
-fakeSampleCBICCalibration <- calibrateBrainCharts(filter(brainChartsDFFake, study == "HBNCBIC2"), phenotype = phenotype)
-fakeSampleCUNYCalibration <- calibrateBrainCharts(filter(brainChartsDFFake, study == "HBNCUNY2"), phenotype = phenotype)
-fakeSampleSICalibration <- calibrateBrainCharts(filter(brainChartsDFFake, study == "HBNSI2"), phenotype = phenotype)
-fakeSampleRUCalibration <- calibrateBrainCharts(filter(brainChartsDFFake, study == "HBNRU2"), phenotype = phenotype)
-
-
-n <- 50
-subFakeCBIC <- filter(brainChartsDFFake, study == "HBNCBIC2")
-P <- randperm(1:nrow(subFakeCBIC))
-subFakeCBIC <- subFakeCBIC[P[1:n],]
-subFakeCUNY <- filter(brainChartsDFFake, study == "HBNCUNY2")
-P <- randperm(1:nrow(subFakeCUNY))
-subFakeCUNY <- subFakeCUNY[P[1:n],]
-subFakeRU <- filter(brainChartsDFFake, study == "HBNRU2")
-P <- randperm(1:nrow(subFakeRU))
-subFakeRU <- subFakeRU[P[1:n],]
-subFakeSI <- filter(brainChartsDFFake, study == "HBNSI2")
-P <- randperm(1:nrow(subFakeSI))
-subFakeSI <- subFakeSI[P[1:n],]
 
 # accuracy evaluation
 
-# run the centile-informed calibration
+# calibrate the full fake samples
+fakeSampleCBICCalibration <- calibrateBrainCharts(filter(brainChartsDFFake, study == "HBNCBIC2"), phenotype = phenotype)
+# fakeSampleCUNYCalibration <- calibrateBrainCharts(filter(brainChartsDFFake, study == "HBNCUNY2"), phenotype = phenotype)
+# fakeSampleSICalibration <- calibrateBrainCharts(filter(brainChartsDFFake, study == "HBNSI2"), phenotype = phenotype)
+# fakeSampleRUCalibration <- calibrateBrainCharts(filter(brainChartsDFFake, study == "HBNRU2"), phenotype = phenotype)
 
-subFakeCBICQuantileCalibration <- calibrateBrainChartsIDQuantilePenalty(subFakeCBIC, phenotype = "CT", largeSiteOutput = fullSampleCBICCalibration)
-subFakeCUNYQuantileCalibration <- calibrateBrainChartsIDQuantilePenalty(subFakeCUNY, phenotype = "CT", largeSiteOutput = fullSampleCUNYCalibration)
-subFakeSIQuantileCalibration <- calibrateBrainChartsIDQuantilePenalty(subFakeSI, phenotype = "CT", largeSiteOutput = fullSampleSICalibration)
-subFakeRUQuantileCalibration <- calibrateBrainChartsIDQuantilePenalty(subFakeRU, phenotype = "CT", largeSiteOutput = fullSampleRUCalibration)
+# run the centile-informed calibration
 
 # run the normal Braincharts calibration on the small sites 
 subFakeCBICCalibration <- calibrateBrainCharts(subFakeCBIC, phenotype = "CT")
-subFakeCUNYCalibration <- calibrateBrainCharts(subFakeCUNY, phenotype = "CT")
-subFakeRUCalibration <- calibrateBrainCharts(subFakeRU, phenotype = "CT")
-subFakeSICalibration <- calibrateBrainCharts(subFakeSI, phenotype = "CT")
+# subFakeCUNYCalibration <- calibrateBrainCharts(subFakeCUNY, phenotype = "CT")
+# subFakeRUCalibration <- calibrateBrainCharts(subFakeRU, phenotype = "CT")
+# subFakeSICalibration <- calibrateBrainCharts(subFakeSI, phenotype = "CT")
 
 # make plots 
 

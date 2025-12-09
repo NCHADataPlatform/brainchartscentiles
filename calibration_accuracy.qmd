@@ -3,108 +3,34 @@ title: "BrainChart calibration - assessing accuracy of centile method"
 format: html
 ---
 
-```{r, echo=FALSE}
-knitr::read_chunk("calibration_example_hbn_accuracy.R")
-```
-
-```{r Packages, message = FALSE, warning = FALSE}
-library('tidyverse')
-```
-
 # Introduction
 
-This tutorial demonstrates how to assess the accuracy of the proposed centile-informed calibration compared to the original Braincharts' method on small samples on the HBN dataset. The first thing to do is source the script that loads and performs the original calibration:
+This tutorial demonstrates how to assess the accuracy of the proposed centile-informed calibration compared to the original Braincharts' method on small samples on the HBN dataset. 
+The first thing to do is source the script that loads and performs the original calibration:
+
+```{r Packages, message = FALSE, warning = FALSE, echo = FALSE}
+library('tidyverse')
+library('pracma')
+```
 
 ```{r Setup, message = FALSE, warning = FALSE}
 source('calibration_example_hbn.R')
 ```
 
-## Generate synthetic timepoint
-
-For each site, we generate a synthetic repeated-measures sample, approximately one year post-baseline. The following code inserts the predicted distribution parameters into the original dataframe, copies the data to a *fake* dataframe with altered parameters. The new cortical thickness values are then generated and the study names are updated to be different to the original:
-
-```{r SetupSecondTimepoint, message = FALSE, warning = FALSE}
-
-brainChartsDF <- data.frame(brainChartsDF)
-row.names(brainChartsDF) <- brainChartsDF$ID
-brainChartsDF$mu.wre <- NA
-brainChartsDF$sigma.wre <- NA
-brainChartsDF$nu.wre <- NA
-
-brainChartsDF[row.names(fullSampleCBICCalibration$DATA.PRED2), 'mu.wre'] <- fullSampleCBICCalibration$DATA.PRED2[row.names(fullSampleCBICCalibration$DATA.PRED2), 'mu.wre']
-brainChartsDF[row.names(fullSampleCBICCalibration$DATA.PRED2), 'sigma.wre'] <- fullSampleCBICCalibration$DATA.PRED2[row.names(fullSampleCBICCalibration$DATA.PRED2), "sigma.wre"]
-brainChartsDF[row.names(fullSampleCBICCalibration$DATA.PRED2), 'nu.wre'] <- fullSampleCBICCalibration$DATA.PRED2[row.names(fullSampleCBICCalibration$DATA.PRED2), "nu.wre"]
-
-brainChartsDF[row.names(fullSampleCUNYCalibration$DATA.PRED2), 'mu.wre'] <- fullSampleCUNYCalibration$DATA.PRED2[row.names(fullSampleCUNYCalibration$DATA.PRED2), "mu.wre"]
-brainChartsDF[row.names(fullSampleCUNYCalibration$DATA.PRED2), 'sigma.wre'] <- fullSampleCUNYCalibration$DATA.PRED2[row.names(fullSampleCUNYCalibration$DATA.PRED2), "sigma.wre"]
-brainChartsDF[row.names(fullSampleCUNYCalibration$DATA.PRED2), 'nu.wre'] <- fullSampleCUNYCalibration$DATA.PRED2[row.names(fullSampleCUNYCalibration$DATA.PRED2), "nu.wre"]
-
-brainChartsDF[row.names(fullSampleRUCalibration$DATA.PRED2), 'mu.wre'] <- fullSampleRUCalibration$DATA.PRED2[row.names(fullSampleRUCalibration$DATA.PRED2), "mu.wre"]
-brainChartsDF[row.names(fullSampleRUCalibration$DATA.PRED2), 'sigma.wre'] <- fullSampleRUCalibration$DATA.PRED2[row.names(fullSampleRUCalibration$DATA.PRED2), "sigma.wre"]
-brainChartsDF[row.names(fullSampleRUCalibration$DATA.PRED2), 'nu.wre'] <- fullSampleRUCalibration$DATA.PRED2[row.names(fullSampleRUCalibration$DATA.PRED2), "nu.wre"]
-
-brainChartsDF[row.names(fullSampleSICalibration$DATA.PRED2), 'mu.wre'] <- fullSampleSICalibration$DATA.PRED2[row.names(fullSampleSICalibration$DATA.PRED2), "mu.wre"]
-brainChartsDF[row.names(fullSampleSICalibration$DATA.PRED2), 'sigma.wre'] <- fullSampleSICalibration$DATA.PRED2[row.names(fullSampleSICalibration$DATA.PRED2), "sigma.wre"]
-brainChartsDF[row.names(fullSampleSICalibration$DATA.PRED2), 'nu.wre'] <- fullSampleSICalibration$DATA.PRED2[row.names(fullSampleSICalibration$DATA.PRED2), "nu.wre"]
-
-# generate a new table with altered distribution parameters
-brainChartsDFFake <- brainChartsDF
-
-# add timepoint effects
-muNudge <- 0.1
-sigmaNudge <- 0.1
-brainChartsDFFake$mu.wre <- brainChartsDF$mu.wre + muNudge
-brainChartsDFFake$sigma.wre <- brainChartsDF$sigma.wre + sigmaNudge
-
-# add a year to the ages and some randomness
-brainChartsDFFake$age_days <- brainChartsDFFake$age_days + 365.25 + abs(rnorm(nrow(brainChartsDFFake), mean = 0, sd = 10))
-# generate variables from altered distributions
-brainChartsDFFake$CT <- rGGalt(nrow(brainChartsDFFake), exp(brainChartsDFFake$mu.wre), exp(brainChartsDFFake$sigma.wre), brainChartsDFFake$nu.wre) * 10000
-
-brainChartsDFFake$study <- paste0(brainChartsDFFake$study, "2")
-```
-
-The dataframe *brainChartsDFFake* contains the repeated measures timepoint. We now subsample this frame to create small samples:
-
-```{r CreateSmallSamples, message = FALSE, warning = FALSE}
-n <- 50
-subFakeCBIC <- filter(brainChartsDFFake, study == "HBNCBIC2")
-P <- randperm(1:nrow(subFakeCBIC))
-subFakeCBIC <- subFakeCBIC[P[1:n],]
-subFakeCUNY <- filter(brainChartsDFFake, study == "HBNCUNY2")
-P <- randperm(1:nrow(subFakeCUNY))
-subFakeCUNY <- subFakeCUNY[P[1:n],]
-subFakeRU <- filter(brainChartsDFFake, study == "HBNRU2")
-P <- randperm(1:nrow(subFakeRU))
-subFakeRU <- subFakeRU[P[1:n],]
-subFakeSI <- filter(brainChartsDFFake, study == "HBNSI2")
-P <- randperm(1:nrow(subFakeSI))
-subFakeSI <- subFakeSI[P[1:n],]
-```
-
-This code selects 50 random subjects from each sample.
-
-## Calibration - Phase 1
+# Calibration - Phase 1
 
 The normal calibration is now performed on the small sample using the original Braincharts' method:
 
 ```{r Calib1, message = FALSE, warning = FALSE}
 subFakeCBICCalibration <- calibrateBrainCharts(subFakeCBIC, phenotype = "CT")
-subFakeCUNYCalibration <- calibrateBrainCharts(subFakeCUNY, phenotype = "CT")
-subFakeRUCalibration <- calibrateBrainCharts(subFakeRU, phenotype = "CT")
-subFakeSICalibration <- calibrateBrainCharts(subFakeSI, phenotype = "CT")
 ```
 
-
-## Calibration - Phase 2
+# Calibration - Phase 2
 
 We now run the calibration on the small samples using centile-informed calibration method using the large sample data:
 
 ```{r Calib2, message = FALSE, warning = FALSE}
 subFakeCBICQuantileCalibration <- calibrateBrainChartsIDQuantilePenalty(subFakeCBIC, phenotype = "CT", largeSiteOutput = fullSampleCBICCalibration)
-subFakeCUNYQuantileCalibration <- calibrateBrainChartsIDQuantilePenalty(subFakeCUNY, phenotype = "CT", largeSiteOutput = fullSampleCUNYCalibration)
-subFakeSIQuantileCalibration <- calibrateBrainChartsIDQuantilePenalty(subFakeSI, phenotype = "CT", largeSiteOutput = fullSampleSICalibration)
-subFakeRUQuantileCalibration <- calibrateBrainChartsIDQuantilePenalty(subFakeRU, phenotype = "CT", largeSiteOutput = fullSampleRUCalibration)
 
 ```
 
@@ -114,14 +40,11 @@ We now calibrate the entire fake sample. The computed parameters are used as gro
 
 ```{r Calib3, message = FALSE, warning = FALSE}
 fakeSampleCBICCalibration <- calibrateBrainCharts(filter(brainChartsDFFake, study == "HBNCBIC2"), phenotype = phenotype)
-fakeSampleCUNYCalibration <- calibrateBrainCharts(filter(brainChartsDFFake, study == "HBNCUNY2"), phenotype = phenotype)
-fakeSampleSICalibration <- calibrateBrainCharts(filter(brainChartsDFFake, study == "HBNSI2"), phenotype = phenotype)
-fakeSampleRUCalibration <- calibrateBrainCharts(filter(brainChartsDFFake, study == "HBNRU2"), phenotype = phenotype)
-
 ```
 
+# Make plots for evaluation
 
-## Make plots for evaluation
+Make a ggplot demonstrating the accuracy of the proposed method. The plot shows the estimated centiles of the site-corrected distributions from the full synthetic dataset, this is ground truth, and the estimated centiles. The closer the estimated centiles are to the ground truth ones, the more accurate the method is.
 
 ```{r MakePlots, message = FALSE, warning = FALSE}
 fullSampleCBICCalibration$DATA.PRED2$fitting <- 'large sample (cross-sectional method)'
@@ -130,15 +53,11 @@ subFakeCBICCalibration$DATA.PRED2$fitting <- 'small site (cross-sectional method
 fakeSampleCBICCalibration$DATA.PRED2$fitting <- 'small site (ground truth)'
 
 fullSampleCBICCalibration$DATA.PRED2$sample <- "large"
-fullSampleCBICCalibration$DATA.PRED2
 subFakeCBICQuantileCalibration$DATA.PRED2$sample <- "small"
 subFakeCBICCalibration$DATA.PRED2$sample <- "small"
 fakeSampleCBICCalibration$DATA.PRED2$sample <- "small"
 
 T <- bind_rows(fullSampleCBICCalibration$DATA.PRED2, subFakeCBICQuantileCalibration$DATA.PRED2, subFakeCBICCalibration$DATA.PRED2, fakeSampleCBICCalibration$DATA.PRED2)
-
-#mapping <- c(V1 = "large", V5 = "small")
-#T$sample <- mapping[T$study]
 
 # dont need to plot the ground truth CT measures for the small site
 T$meanCT2Transformed[T$fitting == "small site (ground truth)"] <- NA
@@ -152,6 +71,4 @@ ggplot(T, aes(x = age_days)) +
   geom_line(aes(y = PRED.m500.wre * 10000, colour = fitting), linewidth = 1) +
   geom_line(aes(y = PRED.u750.wre * 10000, colour = fitting)) +
   labs(x = "Age (years)", y = "CT", colour = "Estimation Method")
-
-ggsave('freesurfer_example_hbn_CBIC.png')
 ```

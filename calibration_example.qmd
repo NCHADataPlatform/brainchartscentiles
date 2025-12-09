@@ -209,31 +209,40 @@ the data is correctly loaded
 ```{r StudyOverview}
 count(brainChartsDF, study)
 count(brainChartsDF, study, sex, sort = FALSE)
+
 ```
 
 ## Calibration, Phase 1
 Phase 1 of calibration is the standard, cross sectional, version proposed
-in the original BrainCharts paper. We show cortical thickness as the IDP of interest. We perform this on a per-study basis, since each study represents a single sample. We will only show one site (CBIC), since we only require one site to illustrate usage.
+in the original BrainCharts paper. We show cortical thickness as the IDP of interest. 
+We perform this on a per-study basis, since each study represents a single sample. We will only show one site (CBIC), since we only require one site to illustrate usage.
 
-```{r CalibrationPhase1, warning=FALSE}
-fullSampleCBICCalibration <- calibrateBrainCharts(filter(brainChartsDF, study == "HBNCBIC"), phenotype = "CT")
+```{r CalibrationPhase1, warning=FALSE, echo=TRUE}
+brainChartsDF <- data.frame(brainChartsDF)
+brainChartsDF <- filter(brainChartsDF, study == "HBNCBIC")
+row.names(brainChartsDF) <- brainChartsDF$participant
+fullSampleCBICCalibration <- calibrateBrainCharts(brainChartsDF, phenotype = "CT")
 ```
 
 The results data structure will be described, this is purely for reference. The dataframe *fullSampleCBICCalibration* is the output
 
-- *fullSampleCBICCalibration$expanded*: The model parameters 
-    - *fullSampleCBICCalibration$expanded$mu$ranef*: The $\mu$ site-effect estimates. The user-provided study name will be the estimated effect for the sample, i.e. fullSampleCBICCalibration$expanded$mu$ranef[['HBNCBIC']]
-    - *fullSampleCBICCalibration$expanded$sigma$ranef*: The $\mu$ site-effect estimates. The user-provided study name will be the estimated effect for the sample, i.e. fullSampleCBICCalibration$expanded$mu$ranef[['HBNCBIC']]
-- *fullSampleCBICCalibration$DATA.PRED*: The data with predicted values from the model *before* calibration
-- *fullSampleCBICCalibration$DATA.PRED2*: The data with predicted values for parameters *after* calibration
-    - *fullSampleCBICCalibration$DATA.PRED2$meanCT2transformed*
+- `fullSampleCBICCalibration$expanded`: The model parameters 
+    - `fullSampleCBICCalibration$expanded$mu$ranef`: The $\mu$ site-effect estimates. The user-provided study name will be the estimated effect for the sample, in this example it is `fullSampleCBICCalibration$expanded$mu$ranef[['HBNCBIC']]`
+    - `fullSampleCBICCalibration$expanded$sigma$ranef`: The $\mu$ site-effect estimates. The user-provided study name will be the estimated effect for the sample, in this example it is `fullSampleCBICCalibration$expanded$mu$ranef[['HBNCBIC']]`
+- `fullSampleCBICCalibration$DATA.PRED`: The data with predicted values from the model *before* calibration
+- `fullSampleCBICCalibration$DATA.PRED2`: The data with predicted values for parameters *after* calibration
+    - `fullSampleCBICCalibration$DATA.PRED2$meanCT2transformed`: the transformed cortical thickness values
+    - `fullSampleCBICCalibration$DATA.PRED2$mu.wre`: the estimated $\mu$ for each measurement
+    - `fullSampleCBICCalibration$DATA.PRED2$sigma.wre`: the estimated $\sigma$ for each measurement
+    - `fullSampleCBICCalibration$DATA.PRED2$PRED.l250.wre`: the estimated 0.25 centile for each measurement
+    - `fullSampleCBICCalibration$DATA.PRED2$PRED.m500.wre`: the estimated 0.5 (median) centile for each measurement
+    - `fullSampleCBICCalibration$DATA.PRED2$PRED.u750.wre`: the estimated 0.75 centile for each measurement
 
+ggsave('freesurfer_example_hbn_CBIC.png')
 ## Calibration, Phase 2
 Phase 2 of calibration is the "small" sample calibration. For this example, we have to simulate a "small" repeated-measures sample. To do this we create a synthetic, longitudinal follow up sample with slightly altered parameters. The code is presented here but wouldn't apply in a real-world exmaple
 
 ```{r CalibrationPhase2Setup, warning=FALSE}
-brainChartsDF <- data.frame(brainChartsDF)
-row.names(brainChartsDF) <- brainChartsDF$ID
 brainChartsDF$mu.wre <- NA
 brainChartsDF$sigma.wre <- NA
 brainChartsDF$nu.wre <- NA
@@ -261,7 +270,6 @@ brainChartsDFFake$CT <- rGGalt(nrow(brainChartsDFFake), exp(brainChartsDFFake$mu
 brainChartsDFFake$study <- paste0(brainChartsDFFake$study, "2")
 ```
 
-
 Now, we select a random subsample of the CBIC study from the synthetic timepoint.
 
 ```{r CalibrationPhase2Select, warning=FALSE}
@@ -276,3 +284,4 @@ Here, `subFakeCBIC` would represent the "small" sample an investigator is wishin
 ```
 subFakeCBICOutQuantile <- calibrateBrainChartsIDQuantilePenalty(subFakeCBIC, phenotype = "CT", largeSiteOutput = fullSampleCBICCalibration)
 ```
+
