@@ -135,10 +135,13 @@ row.names(brainChartsDF) <- brainChartsDF$ID
 phenotype <- "CT"
 
 # do the full sample calibrations per site
-fullSampleCBICCalibration <- calibrateBrainCharts(filter(brainChartsDF, study == "HBNCBIC"), phenotype = phenotype)
+fullSampleCBICCalibration <- calibrateBrainCharts(
+  filter(brainChartsDF, study == "HBNCBIC"), phenotype = phenotype)
 
 # ---- SimulateSmallSiteSetup ----
-simulateSmallSite <- function(fullSampleCalibration, BC) {
+
+
+simulateSite <- function(fullSampleCalibration, BC) {
   row.names(fullSampleCalibration$DATA.PRED2) <- fullSampleCBICCalibration$DATA.PRED2$ID
   
   BC$mu.wre <- NA
@@ -164,15 +167,20 @@ simulateSmallSite <- function(fullSampleCalibration, BC) {
   BCFake$CT <- rGGalt(nrow(BCFake), exp(BCFake$mu.wre), exp(BCFake$sigma.wre), BCFake$nu.wre) * 10000
   
   BCFake$study <- paste0(BCFake$study, "2")
-  
+  # add some patients too.
+  return(BCFake)
+ }
+
+simulateSmallSite <- function(fullSampleCalibration, BC) {
+  BCFake <- simulateSite(fullSampleCalibration, BC)
   n <- 50
   subFakeCBIC <- filter(BCFake, study == "HBNCBIC2")
   P <- randperm(1:nrow(subFakeCBIC))
   subFakeCBIC <- subFakeCBIC[P[1:n],]
-  
-  # add some patients too.
   return(subFakeCBIC)
 }
+# ---- SimulateCompleteSite ----
+brainChartsDFFake <- simulateSite(fullSampleCBICCalibration, brainChartsDF)
 # ---- SimulateSmallSite ----
 
 subFakeCBIC <- simulateSmallSite(fullSampleCBICCalibration, brainChartsDF)

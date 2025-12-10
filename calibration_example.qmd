@@ -39,7 +39,10 @@ Using the calibration functions requires the following steps:
 1. Loading brain IDPs
 1. Attaching demographic and site data
 1. Renaming columns
-
+1. Calibrating the large population sample
+1. Calibrate the small population sample with repeated measures in the large 
+   population sample
+   
 This tutorial illustrates calibration using a combination of data from the healthy
 brain network and synthetic data. The code can be used as a template to
 calibrate your own data.
