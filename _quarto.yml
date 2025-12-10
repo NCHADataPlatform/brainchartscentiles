@@ -19,5 +19,7 @@ website:
     contents:
       - text: "Overview"
         href: "index.qmd"
-      - href: "calibration_example.qmd"
-      - href: "calibration_accuracy.qmd"
+      - text: "Calibration example"
+        href: "calibration_example.qmd"
+      - text: "Accuracy assessment"
+        href: "calibration_accuracy.qmd"
