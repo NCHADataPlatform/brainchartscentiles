@@ -17,6 +17,7 @@ website:
     style: "docked"
     search: true
     contents:
-      - href: "index.qmd"
+      - text: "Overview"
+        href: "index.qmd"
       - href: "calibration_example.qmd"
       - href: "calibration_accuracy.qmd"
