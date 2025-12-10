@@ -13,7 +13,7 @@ setwd(wd)
 # ---- LoadingStructuralData ----
 readFS <- function(fname) {
   df <- read_csv(fname, name_repair = "universal", show_col_types = FALSE)
-  colnames(df)[1] <- "ID"
+  df <- rename(df, ID = 1)
   return(df)
 }
 
