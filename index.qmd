@@ -1,0 +1,56 @@
+---
+title: "Small sample, repeated measure, calibration with BrainChart"
+format: html
+---
+
+# Introduction
+
+This site contains two tutorials explaining calibration using the method published
+in:
+
+# Installation
+
+This software runs as as addon to the Braincharts software, which was written in R. In a shell, obtain the software from GitHub as follows:
+
+```{bash eval=FALSE}
+git clone https://github.com/NCHADataPlatform/brainchartscentiles.git
+cd brainchartscentiles
+git submodule init .
+git submodule update
+```
+
+# R dependencies
+
+In R, install the required packages for Braincharts:
+
+```{r eval=FALSE}
+install.packages(c('gamlss', 'tidyverse'))
+```
+
+Then install the dependencies for the example scripts on the github repository:
+
+```{r eval=FALSE}
+install.packages(c('ggplot2', 'pracma'))
+```
+
+The previous two commands only need to be executed once. 
+
+For each R session, execute the following to import the software:
+
+```{r eval=FALSE}
+source('<install directory>/calibrate_braincharts_centiles.R')
+```
+
+# Tutorial 1:
+
+This is where you should start after installing the software
+
+[Calibration tutorial](calibration_example.qmd)
+
+# Tutorial 2:
+
+This is minimal example of the procedures used to assess calibration accuracy
+as reported in the paper.
+
+[Accuracy assessment](calibration_accuracy.qmd)
+

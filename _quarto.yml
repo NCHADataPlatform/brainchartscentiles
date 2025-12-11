@@ -2,6 +2,7 @@ project:
   type: website
   output-dir: docs
   render:
+    - index.qmd
     - calibration_example.qmd
     - calibration_accuracy.qmd
 
@@ -10,3 +11,15 @@ format:
     theme: cosmo
     css: styles.css
     toc: true
+    
+website:
+  sidebar:
+    style: "docked"
+    search: true
+    contents:
+      - text: "Overview"
+        href: "index.qmd"
+      - text: "Calibration example"
+        href: "calibration_example.qmd"
+      - text: "Accuracy assessment"
+        href: "calibration_accuracy.qmd"
