@@ -84,28 +84,24 @@ brainChartsDF <- mutate(brainChartsDF,
                         country = 'Australia',
 )
 
+brainChartsDF <- filter(brainChartsDF, CT > 2)
+
 # ---- MakeDXColumn ----
 brainChartsDF <- mutate(brainChartsDF, 
                         dx = "CN"
 )
 
+# make the last 5 subjects non-controls
+
+brainChartsDF$dx[(nrow(brainChartsDF)-4):nrow(brainChartsDF)] <- "notCN"
+
 # ---- LoadDemo ----
 
-demoCBIC <- read_csv(file.path('HBN', 'participants-CBIC.csv'), 
+demoDF <- read_csv(file.path('HBN', 'participants-CBIC.csv'), 
                      show_col_types = FALSE)
-demoCUNY <- read_csv(file.path('HBN', 'participants-CUNY.csv'), 
-                     show_col_types = FALSE)
-demoSI <- read_csv(file.path('HBN', 'participants-SI.csv'), 
-                   show_col_types = FALSE)
-demoRU <- read_csv(file.path('HBN', 'participants-RU.csv'), 
-                   show_col_types = FALSE)
 
-demoCBIC <- mutate(demoCBIC, study = 'HBNCBIC')
-demoCUNY <- mutate(demoCUNY,study = 'HBNCUNY')
-demoSI <- mutate(demoSI, study = 'HBNSI')
-demoRU <- mutate(demoRU , study = 'HBNRU')
+demoDF <- mutate(demoDF, study = 'HBNCBIC')
 
-demoDF <- bind_rows(demoCBIC, demoCUNY, demoSI, demoRU)
 demoDF <- mutate(demoDF, age_days = Age * 365.25)
 demoDF <- rename(demoDF, sex = Sex)
 
@@ -119,7 +115,7 @@ brainChartsDF <- left_join(brainChartsDF,
 
 # remove mising values
 brainChartsDF <- na.omit(brainChartsDF)
-brainChartsDF <- mutate(brainChartsDF, study = factor(study, levels=c("HBNCBIC", "HBNCUNY", "HBNRU", "HBNSI")))
+brainChartsDF <- mutate(brainChartsDF, study = factor(study, levels=c("HBNCBIC")))
 
 # ---- StudyOverview ----
 
@@ -127,7 +123,6 @@ count(brainChartsDF, study)
 count(brainChartsDF, study, sex, sort = FALSE)
 
 # ---- CalibrationPhase1 ----
-brainChartsDF <- filter(brainChartsDF, study == "HBNCBIC")
 # convert to dataframe for compatability with non-tidyverse code
 brainChartsDF <- data.frame(brainChartsDF)
 row.names(brainChartsDF) <- brainChartsDF$ID
@@ -135,14 +130,14 @@ row.names(brainChartsDF) <- brainChartsDF$ID
 phenotype <- "CT"
 
 # do the full sample calibrations per site
-fullSampleCBICCalibration <- calibrateBrainCharts(
-  filter(brainChartsDF, study == "HBNCBIC"), phenotype = phenotype)
+fullSampleCalibration <- calibrateBrainCharts(
+  brainChartsDF, phenotype = phenotype)
 
 # ---- SimulateSmallSiteSetup ----
 
 
 simulateSite <- function(fullSampleCalibration, BC) {
-  row.names(fullSampleCalibration$DATA.PRED2) <- fullSampleCBICCalibration$DATA.PRED2$ID
+  row.names(fullSampleCalibration$DATA.PRED2) <- fullSampleCalibration$DATA.PRED2$ID
   
   BC$mu.wre <- NA
   BC$sigma.wre <- NA
@@ -174,18 +169,43 @@ simulateSite <- function(fullSampleCalibration, BC) {
 simulateSmallSite <- function(fullSampleCalibration, BC) {
   BCFake <- simulateSite(fullSampleCalibration, BC)
   n <- 50
-  subFakeCBIC <- filter(BCFake, study == "HBNCBIC2")
-  P <- randperm(1:nrow(subFakeCBIC))
-  subFakeCBIC <- subFakeCBIC[P[1:n],]
-  return(subFakeCBIC)
+  I <- which(BC$dx == "CN")
+  P <- randperm(1:length(I))
+  BCFake <- BCFake[I[P[1:n]],]
+  BCFake <- bind_rows(BCFake, BCFake[BCFake$dx == "notCN",])
+  return(BCFake)
 }
 # ---- SimulateCompleteSite ----
-brainChartsDFFake <- simulateSite(fullSampleCBICCalibration, brainChartsDF)
+brainChartsDFFake <- simulateSite(fullSampleCalibration, brainChartsDF)
 # ---- SimulateSmallSite ----
 
-subFakeCBIC <- simulateSmallSite(fullSampleCBICCalibration, brainChartsDF)
+subFakeDF <- simulateSmallSite(fullSampleCalibration, brainChartsDF)
 # ---- CalibrationPhase2 ----
 
-subFakeCBICQuantileCalibration <- 
-  calibrateBrainChartsIDQuantilePenalty(subFakeCBIC, phenotype = "CT", 
-                                        largeSiteOutput = fullSampleCBICCalibration)
+subFakeQuantileCalibration <- 
+  calibrateBrainChartsIDQuantilePenalty(subFakeDF, phenotype = "CT", 
+                                        largeSiteOutput = fullSampleCalibration)
+
+
+# ---- ResultsPrint -----
+fullSampleCalibration$DATA.PRED2$sample <- "large"
+subFakeQuantileCalibration$DATA.PRED2$sample <- "small"
+
+I <- which(fullSampleCalibration$DATA.PRED2$dx == "CN")
+J <- which(fullSampleCalibration$DATA.PRED2$dx == "notCN")
+S <- bind_rows(fullSampleCalibration$DATA.PRED2[I[1],], fullSampleCalibration$DATA.PRED2[J[1],])
+
+S[, c('dx', 'age_days', 
+      'PRED.l025.pop', 'PRED.l250.pop', 'PRED.m500.pop', 'PRED.u750.pop', 'PRED.u975.pop',
+      'PRED.l025.wre', 'PRED.l250.wre', 'PRED.m500.wre', 'PRED.u750.wre', 'PRED.u975.wre',
+      'meanCT2Transformed.q.wre', 'meanCT2Transformed.normalised')]
+
+# ---- MakePlots -----
+T <- bind_rows(fullSampleCalibration$DATA.PRED2, subFakeQuantileCalibration$DATA.PRED2)
+
+ggplot(T, aes(x = age_days / 365.25)) +
+  geom_point(aes(y = meanCT2Transformed * 10000, shape = dx), alpha = 0.5) +
+  geom_line(aes(y = PRED.l250.wre * 10000, colour=sample)) + 
+  geom_line(aes(y = PRED.m500.wre * 10000, colour=sample), linewidth = 1) +
+  geom_line(aes(y = PRED.u750.wre * 10000, colour=sample)) +
+  labs(x = "Age (years)", y = "CT", colour = "Sample")

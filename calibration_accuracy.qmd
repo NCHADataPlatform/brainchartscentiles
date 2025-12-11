@@ -3,72 +3,36 @@ title: "BrainChart calibration - assessing accuracy of centile method"
 format: html
 ---
 
+```{r, echo=FALSE}
+knitr::read_chunk("calibration_example_hbn_accuracy.R")
+```
+
 # Introduction
 
 This tutorial demonstrates how to assess the accuracy of the proposed centile-informed calibration compared to the original Braincharts' method on small samples on the HBN dataset. 
 The first thing to do is source the script that loads and performs the original calibration:
 
 ```{r Packages, message = FALSE, warning = FALSE, echo = FALSE}
-library('tidyverse')
-library('pracma')
 ```
 
-```{r Setup, message = FALSE, warning = FALSE}
-source('calibration_example_hbn.R')
-```
-
-# Calibration - Phase 1
+# Calibration - Braincharts' calibration on the small sample
 
 The normal calibration is now performed on the small sample using the original Braincharts' method:
 
 ```{r Calib1, message = FALSE, warning = FALSE}
-subFakeCBICCalibration <- calibrateBrainCharts(subFakeCBIC, phenotype = "CT")
 ```
 
-# Calibration - Phase 2
-
-We now run the calibration on the small samples using centile-informed calibration method using the large sample data:
-
-```{r Calib2, message = FALSE, warning = FALSE}
-subFakeCBICQuantileCalibration <- calibrateBrainChartsIDQuantilePenalty(subFakeCBIC, phenotype = "CT", largeSiteOutput = fullSampleCBICCalibration)
-
-```
-
-## Calibration of full fake sample
+# Calibration - Braincharts' calibration on the full fake sample
 
 We now calibrate the entire fake sample. The computed parameters are used as ground truth for evaluation:
 
 ```{r Calib3, message = FALSE, warning = FALSE}
-fakeSampleCBICCalibration <- calibrateBrainCharts(filter(brainChartsDFFake, study == "HBNCBIC2"), phenotype = phenotype)
 ```
 
 # Make plots for evaluation
 
-Make a ggplot demonstrating the accuracy of the proposed method. The plot shows the estimated centiles of the site-corrected distributions from the full synthetic dataset, this is ground truth, and the estimated centiles. The closer the estimated centiles are to the ground truth ones, the more accurate the method is.
+The plot shows the estimated centiles of the site-corrected distributions from the full synthetic dataset, this is ground truth, and the estimated centiles. The closer the estimated centiles are to the ground truth ones, the more accurate the method is.
 
 ```{r MakePlots, message = FALSE, warning = FALSE}
-fullSampleCBICCalibration$DATA.PRED2$fitting <- 'large sample (cross-sectional method)'
-subFakeCBICQuantileCalibration$DATA.PRED2$fitting <- 'small site (centile method)'
-subFakeCBICCalibration$DATA.PRED2$fitting <- 'small site (cross-sectional method)'
-fakeSampleCBICCalibration$DATA.PRED2$fitting <- 'small site (ground truth)'
-
-fullSampleCBICCalibration$DATA.PRED2$sample <- "large"
-subFakeCBICQuantileCalibration$DATA.PRED2$sample <- "small"
-subFakeCBICCalibration$DATA.PRED2$sample <- "small"
-fakeSampleCBICCalibration$DATA.PRED2$sample <- "small"
-
-T <- bind_rows(fullSampleCBICCalibration$DATA.PRED2, subFakeCBICQuantileCalibration$DATA.PRED2, subFakeCBICCalibration$DATA.PRED2, fakeSampleCBICCalibration$DATA.PRED2)
-
-# dont need to plot the ground truth CT measures for the small site
-T$meanCT2Transformed[T$fitting == "small site (ground truth)"] <- NA
-
-# meanCT2Transformed is the transformed cortical thickness
-# PRED.l250.wre, PRED.m500.wre, PRED.u750.wre are the estimated 25th, 50th, and 97.5th Quantiles after site-effect corrections
-
-ggplot(T, aes(x = age_days)) +
-  geom_point(aes(y = meanCT2Transformed * 10000, shape = sample), alpha = 0.5) +
-  geom_line(aes(y = PRED.l250.wre * 10000, colour = fitting)) + 
-  geom_line(aes(y = PRED.m500.wre * 10000, colour = fitting), linewidth = 1) +
-  geom_line(aes(y = PRED.u750.wre * 10000, colour = fitting)) +
-  labs(x = "Age (years)", y = "CT", colour = "Estimation Method")
 ```
+

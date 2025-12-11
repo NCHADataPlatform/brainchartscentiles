@@ -100,7 +100,7 @@ Derived values, such as centiles, are estimated for non-controls, but these meas
 Preparing the demographic information is similar. In the HBN dataset the
 demographic tables are provided on a per-study basis, so we load them individually,
 create a study column, combine into a single table, create an `age_days` column
-and rename the `Sex` column and set up the factor levels. We set the `study` column according to the acquisition site (CBIC, CUNY, SI, HBNRU).
+and rename the `Sex` column and set up the factor levels. We set the `study` column according to the acquisition site (CBIC).
 
 ```{r LoadDemo}
 
@@ -137,28 +137,14 @@ We perform this on a per-study basis, since each study represents a single sampl
 We will illustrate usage with a single site (CBIC).
 
 ```{r CalibrationPhase1, warning=FALSE, echo=TRUE}
-
 ```
 
-The results data structure will be described, this is purely for reference. The dataframe *fullSampleCBICCalibration* is the output
-
-- `fullSampleCBICCalibration$expanded`: The model parameters 
-    - `fullSampleCBICCalibration$expanded$mu$ranef`: The $\mu$ site-effect estimates. The user-provided study name will be the estimated effect for the sample, in this example it is `fullSampleCBICCalibration$expanded$mu$ranef[['HBNCBIC']]`
-    - `fullSampleCBICCalibration$expanded$sigma$ranef`: The $\mu$ site-effect estimates. The user-provided study name will be the estimated effect for the sample, in this example it is `fullSampleCBICCalibration$expanded$mu$ranef[['HBNCBIC']]`
-- `fullSampleCBICCalibration$DATA.PRED`: The data with predicted values from the model *before* calibration
-- `fullSampleCBICCalibration$DATA.PRED2`: The data with predicted values for parameters *after* calibration
-    - `fullSampleCBICCalibration$DATA.PRED2$meanCT2transformed`: the transformed cortical thickness values
-    - `fullSampleCBICCalibration$DATA.PRED2$mu.wre`: the estimated $\mu$ for each measurement
-    - `fullSampleCBICCalibration$DATA.PRED2$sigma.wre`: the estimated $\sigma$ for each measurement
-    - `fullSampleCBICCalibration$DATA.PRED2$PRED.l250.wre`: the estimated 0.25 centile for each measurement
-    - `fullSampleCBICCalibration$DATA.PRED2$PRED.m500.wre`: the estimated 0.5 (median) centile for each measurement
-    - `fullSampleCBICCalibration$DATA.PRED2$PRED.u750.wre`: the estimated 0.75 centile for each measurement
+The fields of the results structure will be described later.
 
 ## Calibration, Phase 2
 Phase 2 of calibration is the "small" sample calibration, which would typically
 form part of the study dataset. We generate a simulated small sample in this
 example.
-
 
 ```{r SimulateSmallSiteSetup, warning=FALSE, echo=FALSE}
 ```
@@ -166,8 +152,39 @@ example.
 ```{r SimulateSmallSite, warning=FALSE}
 ```
 
-Here, `subFakeCBIC` would represent the "small" sample an investigator is wishing to calibrate. We calibrate this sample using the centile-informed repeated measures method, using the large site calibration output previously computed as follows:
+Here, `subFakeDF` would represent the "small" sample an investigator is wishing to calibrate. We calibrate this sample using the centile-informed repeated measures method, using the large site calibration output previously computed as follows:
 
 ```{r CalibrationPhase2, warning=FALSE}
 ```
 
+## Results
+
+```{r ResultsPrint, warning=FALSE}
+```
+
+The results data structure will be described, this is purely for reference. In this example, we will use the `The dataframe *fullSampleCBICCalibration* is the output
+
+- `fullSampleCalibration$expanded`: The model parameters 
+    - `fullSampleCalibration$expanded$mu$ranef`: The $\mu$ site-effect estimates. The user-provided study name will be the estimated effect for the sample, in this example it is `fullSampleCalibration$expanded$mu$ranef[['HBN']]`
+    - `fullSampleCalibration$expanded$sigma$ranef`: The $\mu$ site-effect estimates. The user-provided study name will be the estimated effect for the sample, in this example it is `fullSampleCalibration$expanded$mu$ranef[['HBN']]`
+- `fullSampleCalibration$DATA.PRED`: The data with predicted values from the model *before* calibration
+- `fullSampleCalibration$DATA.PRED2`: The data with predicted values for parameters *after* calibration
+    - `fullSampleCalibration$DATA.PRED2$meanCT2transformed`: the transformed cortical thickness values
+    - `fullSampleCalibration$DATA.PRED2$mu.pop`: the training data $\mu$
+    - `fullSampleCalibration$DATA.PRED2$mu.wre`: the estimated $\mu$ for each measurement
+    - `fullSampleCalibration$DATA.PRED2$sigma.pop`: the training data $\sigma$ for each measurement
+    - `fullSampleCalibration$DATA.PRED2$sigma.wre`: the estimated $\sigma$ for each measurement
+    - `fullSampleCalibration$DATA.PRED2$PRED.l250.pop`: the training data 0.25 centile for each measurement
+    - `fullSampleCalibration$DATA.PRED2$PRED.m500.pop`: the training data 0.5 (median) centile for each measurement
+    - `fullSampleCalibration$DATA.PRED2$PRED.u750.pop`: the training data 0.75 centile for each measurement
+    - `fullSampleCalibration$DATA.PRED2$PRED.l250.wre`: the estimated 0.25 centile for each measurement
+    - `fullSampleCalibration$DATA.PRED2$PRED.m500.wre`: the estimated 0.5 (median) centile for each measurement
+    - `fullSampleCalibration$DATA.PRED2$PRED.u750.wre`: the estimated 0.75 centile for each measurement
+    - `fullSampleCalibration$DATA.PRED2$meanCT2Transformed.q.wre`: the estimated centile of the cortical thickness measurement in the altered site-corrected distribution. These values are in a consistent frame between samples.
+
+## Plotting results
+
+This plot depicts a typical representation of the measured data and the estimated centile lines. The original data are plotted as points with the centile lines overlaid.
+
+```{r MakePlots, warning=FALSE}
+```

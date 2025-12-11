@@ -6,37 +6,30 @@ source('calibration_example_hbn.R')
 
 # accuracy evaluation
 
-# calibrate the full fake samples
-fakeSampleCBICCalibration <- calibrateBrainCharts(filter(brainChartsDFFake, study == "HBNCBIC2"), phenotype = phenotype)
-# fakeSampleCUNYCalibration <- calibrateBrainCharts(filter(brainChartsDFFake, study == "HBNCUNY2"), phenotype = phenotype)
-# fakeSampleSICalibration <- calibrateBrainCharts(filter(brainChartsDFFake, study == "HBNSI2"), phenotype = phenotype)
-# fakeSampleRUCalibration <- calibrateBrainCharts(filter(brainChartsDFFake, study == "HBNRU2"), phenotype = phenotype)
 
 # run the centile-informed calibration
 
 # run the normal Braincharts calibration on the small sites 
-subFakeCBICCalibration <- calibrateBrainCharts(subFakeCBIC, phenotype = "CT")
-# subFakeCUNYCalibration <- calibrateBrainCharts(subFakeCUNY, phenotype = "CT")
-# subFakeRUCalibration <- calibrateBrainCharts(subFakeRU, phenotype = "CT")
-# subFakeSICalibration <- calibrateBrainCharts(subFakeSI, phenotype = "CT")
+# ---- Calib1 ----
+subFakeCalibration <- calibrateBrainCharts(subFakeDF, phenotype = "CT")
 
-# make plots 
+# ---- Calib3 ----
+fakeSampleCalibration <- calibrateBrainCharts(brainChartsDFFake, phenotype = phenotype)
 
-fullSampleCBICCalibration$DATA.PRED2$fitting <- 'large sample (cross-sectional method)'
-subFakeCBICQuantileCalibration$DATA.PRED2$fitting <- 'small site (centile method)'
-subFakeCBICCalibration$DATA.PRED2$fitting <- 'small site (cross-sectional method)'
-fakeSampleCBICCalibration$DATA.PRED2$fitting <- 'small site (ground truth)'
 
-fullSampleCBICCalibration$DATA.PRED2$sample <- "large"
-fullSampleCBICCalibration$DATA.PRED2
-subFakeCBICQuantileCalibration$DATA.PRED2$sample <- "small"
-subFakeCBICCalibration$DATA.PRED2$sample <- "small"
-fakeSampleCBICCalibration$DATA.PRED2$sample <- "small"
+# ---- MakePlots ----
+fullSampleCalibration$DATA.PRED2$fitting <- 'large sample (cross-sectional method)'
+subFakeQuantileCalibration$DATA.PRED2$fitting <- 'small site (centile method)'
+subFakeCalibration$DATA.PRED2$fitting <- 'small site (cross-sectional method)'
+fakeSampleCalibration$DATA.PRED2$fitting <- 'small site (ground truth)'
 
-T <- bind_rows(fullSampleCBICCalibration$DATA.PRED2, subFakeCBICQuantileCalibration$DATA.PRED2, subFakeCBICCalibration$DATA.PRED2, fakeSampleCBICCalibration$DATA.PRED2)
+fullSampleCalibration$DATA.PRED2$sample <- "large"
+fullSampleCalibration$DATA.PRED2
+subFakeQuantileCalibration$DATA.PRED2$sample <- "small"
+subFakeCalibration$DATA.PRED2$sample <- "small"
+fakeSampleCalibration$DATA.PRED2$sample <- "small"
 
-#mapping <- c(V1 = "large", V5 = "small")
-#T$sample <- mapping[T$study]
+T <- bind_rows(fullSampleCalibration$DATA.PRED2, subFakeQuantileCalibration$DATA.PRED2, subFakeCalibration$DATA.PRED2, fakeSampleCalibration$DATA.PRED2)
 
 # dont need to plot the ground truth CT measures for the small site
 T$meanCT2Transformed[T$fitting == "small site (ground truth)"] <- NA
@@ -50,5 +43,3 @@ ggplot(T, aes(x = age_days)) +
   geom_line(aes(y = PRED.m500.wre * 10000, colour = fitting), linewidth = 1) +
   geom_line(aes(y = PRED.u750.wre * 10000, colour = fitting)) +
   labs(x = "Age (years)", y = "CT", colour = "Estimation Method")
-
-ggsave('freesurfer_example_hbn_CBIC.png')
