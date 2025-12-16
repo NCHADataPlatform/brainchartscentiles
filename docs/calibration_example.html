@@ -517,7 +517,7 @@ sub-NDARZZ598MH8               0.37301763                   0.000265776</code></
 </section>
 <section id="plotting-results" class="level2">
 <h2 class="anchored" data-anchor-id="plotting-results">Plotting results</h2>
-<p>This plot depicts a typical representation of the measured data and the estimated centile lines. The original data are plotted as points with the centile lines overlaid.</p>
+<p>This plot depicts a typical representation of the measured data and the estimated centile lines. The original data are plotted as points with the centile lines overlaid. The implication of the calibration is that data points are to be characaterised by their centiles. Thus, the centiles provide a common frame of reference to compare timepoints between samples that is free of sample biases.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>T <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(fullSampleCalibration<span class="sc">$</span>DATA.PRED2, subFakeQuantileCalibration<span class="sc">$</span>DATA.PRED2)</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>M <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">CN =</span> <span class="dv">1</span>, <span class="at">notCN =</span> <span class="dv">5</span>)</span>
@@ -529,7 +529,7 @@ sub-NDARZZ598MH8               0.37301763                   0.000265776</code></
 <span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> PRED.l250.wre <span class="sc">*</span> <span class="dv">10000</span>, <span class="at">colour=</span>sample)) <span class="sc">+</span> </span>
 <span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> PRED.m500.wre <span class="sc">*</span> <span class="dv">10000</span>, <span class="at">colour=</span>sample), <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
 <span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> PRED.u750.wre <span class="sc">*</span> <span class="dv">10000</span>, <span class="at">colour=</span>sample)) <span class="sc">+</span></span>
-<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Age (years)"</span>, <span class="at">y =</span> <span class="st">"CT"</span>, <span class="at">colour =</span> <span class="st">"Sample"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Age (years)"</span>, <span class="at">y =</span> <span class="st">"CT"</span>, <span class="at">colour =</span> <span class="st">"Sample"</span>, <span class="at">size =</span> <span class="st">"Diagnosis"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">

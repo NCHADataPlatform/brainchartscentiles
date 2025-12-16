@@ -212,4 +212,4 @@ ggplot(T, aes(x = age_days / 365.25)) +
   geom_line(aes(y = PRED.l250.wre * 10000, colour=sample)) + 
   geom_line(aes(y = PRED.m500.wre * 10000, colour=sample), linewidth = 1) +
   geom_line(aes(y = PRED.u750.wre * 10000, colour=sample)) +
-  labs(x = "Age (years)", y = "CT", colour = "Sample")
+  labs(x = "Age (years)", y = "CT", colour = "Sample", size = "Diagnosis")
