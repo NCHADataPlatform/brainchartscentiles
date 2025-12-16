@@ -144,7 +144,7 @@
     "href": "calibration_example.html#plotting-results",
     "title": "BrainChart calibration tutorial",
     "section": "Plotting results",
-    "text": "Plotting results\nThis plot depicts a typical representation of the measured data and the estimated centile lines. The original data are plotted as points with the centile lines overlaid.\n\nT &lt;- bind_rows(fullSampleCalibration$DATA.PRED2, subFakeQuantileCalibration$DATA.PRED2)\n\nggplot(T, aes(x = age_days / 365.25)) +\n  geom_point(aes(y = meanCT2Transformed * 10000, shape = dx), alpha = 0.5) +\n  geom_line(aes(y = PRED.l250.wre * 10000, colour=sample)) + \n  geom_line(aes(y = PRED.m500.wre * 10000, colour=sample), linewidth = 1) +\n  geom_line(aes(y = PRED.u750.wre * 10000, colour=sample)) +\n  labs(x = \"Age (years)\", y = \"CT\", colour = \"Sample\")",
+    "text": "Plotting results\nThis plot depicts a typical representation of the measured data and the estimated centile lines. The original data are plotted as points with the centile lines overlaid.\n\nT &lt;- bind_rows(fullSampleCalibration$DATA.PRED2, subFakeQuantileCalibration$DATA.PRED2)\nM &lt;- c(CN = 1, notCN = 5)\n\nT$DXSize &lt;- factor(M[T$dx], labels=c(\"CN\", \"notCN\"))\n\nggplot(T, aes(x = age_days / 365.25)) +\n  geom_point(aes(y = meanCT2Transformed * 10000, colour=sample, size = DXSize), alpha = 0.5) +\n  geom_line(aes(y = PRED.l250.wre * 10000, colour=sample)) + \n  geom_line(aes(y = PRED.m500.wre * 10000, colour=sample), linewidth = 1) +\n  geom_line(aes(y = PRED.u750.wre * 10000, colour=sample)) +\n  labs(x = \"Age (years)\", y = \"CT\", colour = \"Sample\")",
     "crumbs": [
       "Calibration example"
     ]

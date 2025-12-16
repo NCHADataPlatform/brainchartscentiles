@@ -184,7 +184,7 @@ The results data structure will be described, this is purely for reference. In t
 
 ## Plotting results
 
-This plot depicts a typical representation of the measured data and the estimated centile lines. The original data are plotted as points with the centile lines overlaid.
+This plot depicts a typical representation of the measured data and the estimated centile lines. The original data are plotted as points with the centile lines overlaid. The implication of the calibration is that data points are to be characaterised by their centiles. Thus, the centiles provide a common frame of reference to compare timepoints between samples that is free of sample biases.
 
 ```{r MakePlots, warning=FALSE}
 ```

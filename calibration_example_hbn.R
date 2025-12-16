@@ -168,11 +168,12 @@ simulateSite <- function(fullSampleCalibration, BC) {
 
 simulateSmallSite <- function(fullSampleCalibration, BC) {
   BCFake <- simulateSite(fullSampleCalibration, BC)
+  BCFakeOrig <- BCFake
   n <- 50
   I <- which(BC$dx == "CN")
   P <- randperm(1:length(I))
   BCFake <- BCFake[I[P[1:n]],]
-  BCFake <- bind_rows(BCFake, BCFake[BCFake$dx == "notCN",])
+  BCFake <- bind_rows(BCFake, BCFakeOrig[BCFakeOrig$dx == "notCN",])
   return(BCFake)
 }
 # ---- SimulateCompleteSite ----
@@ -202,9 +203,12 @@ S[, c('dx', 'age_days',
 
 # ---- MakePlots -----
 T <- bind_rows(fullSampleCalibration$DATA.PRED2, subFakeQuantileCalibration$DATA.PRED2)
+M <- c(CN = 1, notCN = 5)
+
+T$DXSize <- factor(M[T$dx], labels=c("CN", "notCN"))
 
 ggplot(T, aes(x = age_days / 365.25)) +
-  geom_point(aes(y = meanCT2Transformed * 10000, shape = dx), alpha = 0.5) +
+  geom_point(aes(y = meanCT2Transformed * 10000, colour=sample, size = DXSize), alpha = 0.5) +
   geom_line(aes(y = PRED.l250.wre * 10000, colour=sample)) + 
   geom_line(aes(y = PRED.m500.wre * 10000, colour=sample), linewidth = 1) +
   geom_line(aes(y = PRED.u750.wre * 10000, colour=sample)) +
